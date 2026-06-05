@@ -68,13 +68,13 @@
       <view class="price-main">
         <text class="price-label">建议租金</text>
         <text class="price-num">¥{{priceSuggest.suggested_price}}</text>
-        <text class="price-range">范围：¥{{priceSuggest.price_range?.low}} ~ ¥{{priceSuggest.price_range?.high}}<text class="price-conf">（{{priceSuggest.confidence}}置信度）</text></text>
+        <text class="price-range">范围：¥{{priceRangeLow}} ~ ¥{{priceRangeHigh}}<text class="price-conf">（{{priceSuggest.confidence}}置信度）</text></text>
       </view>
-      <view class="price-reasons" wx:if="{{priceSuggest.reasons?.length}}">
+      <view class="price-reasons" wx:if="{{priceSuggest && priceSuggest.reasons && priceSuggest.reasons.length}}">
         <text class="price-subtitle">📊 分析理由</text>
         <text class="price-reason" wx:for="{{priceSuggest.reasons}}" wx:for-item="r" wx:key="*this">• {{r}}</text>
       </view>
-      <view class="price-tips" wx:if="{{priceSuggest.tips?.length}}">
+      <view class="price-tips" wx:if="{{priceSuggest && priceSuggest.tips && priceSuggest.tips.length}}">
         <text class="price-subtitle">💡 提升建议</text>
         <text class="price-tip" wx:for="{{priceSuggest.tips}}" wx:for-item="t" wx:key="*this">• {{t}}</text>
       </view>

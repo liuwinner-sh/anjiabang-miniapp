@@ -14,7 +14,9 @@ Page({
     aiResult: '',
     aiResultTitle: '',
     priceSuggest: null,
-    posterData: null
+    posterData: null,
+    priceRangeLow: 0,
+    priceRangeHigh: 0
   },
 
   onLoad(opts) {
@@ -293,7 +295,13 @@ Page({
     try {
       const r = await api.post('/properties/' + id + '/price-suggest');
       if (r.code === 0 && r.data) {
-        this.setData({ priceSuggest: r.data.suggestion, aiResultTitle: '💡 复制定价方案' });
+        const s = r.data.suggestion || {};
+        this.setData({
+          priceSuggest: s,
+          priceRangeLow: (s.price_range && s.price_range.low) || 0,
+          priceRangeHigh: (s.price_range && s.price_range.high) || 0,
+          aiResultTitle: '💡 复制定价方案'
+        });
         wx.showToast({ title: '定价分析完成', icon: 'success' });
       } else {
         wx.showToast({ title: r.msg || '定价失败', icon: 'none' });
