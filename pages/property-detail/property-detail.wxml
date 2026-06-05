@@ -40,17 +40,15 @@
   <view class="card" wx:if="{{p.id}}">
     <view class="section-hd"><text class="section-title">📷 房源照片</text><text class="section-more" bindtap="uploadPhoto">+ 添加</text></view>
     <scroll-view class="photo-scroll" scroll-x>
-      <view class="photo-item" wx:for="{{photos}}" wx:key="id" bindtap="onPhotoTap" data-idx="{{idx}}" data-photoid="{{item.id}}" data-url="{{item.url || item}}">
-        <image src="{{item.url || item}}" mode="aspectFill" class="photo-img"/>
-        <view class="photo-actions">
-          <text class="photo-del" catchtap="delPhoto" data-idx="{{idx}}">×</text>
-          <text class="photo-replace" catchtap="replacePhoto" data-idx="{{idx}}" data-photoid="{{item.id}}">↻</text>
-        </view>
-        <view class="photo-order" wx:if="{{idx===0}}"><text class="cover-badge">封面</text></view>
+      <view class="photo-item" wx:for="{{photos}}" wx:for-index="pidx" wx:key="id">
+        <image src="{{item.url || item}}" mode="aspectFill" class="photo-img" catchtap="setCover" data-idx="{{pidx}}"/>
+        <view class="photo-order" wx:if="{{pidx===0}}"><text class="cover-badge">封面</text></view>
+        <text class="photo-del" catchtap="delPhoto" data-idx="{{pidx}}" data-photoid="{{item.id}}">×</text>
+        <text class="photo-replace" catchtap="replacePhoto" data-idx="{{pidx}}" data-photoid="{{item.id}}">↻</text>
       </view>
       <view class="photo-add" bindtap="uploadPhoto"><text>+</text></view>
     </scroll-view>
-    <view class="photo-empty" wx:if="{{photos.length===0}}"><text>暂无照片，点击添加</text></view>
+    <view class="photo-empty" wx:if="{{photos.length===0}}"><text>暂无照片，点此添加</text></view>
   </view>
 
   <!-- AI 工具按钮 -->

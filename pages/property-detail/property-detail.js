@@ -170,83 +170,95 @@ Page({
     });
   },
 
-  // 点击照片弹操作菜单：替换/设为封面/删除
-  onPhotoTap(e) {
+  // × 直接删除照片（无确认弹窗）
+  async delPhoto(e) {
     const idx = e.currentTarget.dataset.idx;
-    wx.showActionSheet({
-      itemList: ['替换照片', '设为封面', '删除'],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          this.replacePhoto(e);
-        } else if (res.tapIndex === 1) {
-          this.setCover(idx);
-        } else if (res.tapIndex === 2) {
-          this.delPhoto(e);
+    const photoid = e.currentTarget.dataset.photoid;
+    const photo = this.data.photos[idx];
+    if (!photo) return;
+    wx.showLoading({ title: '删除中...' });
+    try {
+      if (photoid) {
+        const r = await api.del('/upload/photos/' + photoid);
+        if (r.code !== 0 && r.code !== 404) {
+          wx.hideLoading();
+          wx.showToast({ title: r.msg || '删除失败', icon: 'none' });
+          return;
         }
       }
-    });
+      const photos = [...this.data.photos];
+      photos.splice(idx, 1);
+      this.setData({ photos });
+      wx.hideLoading();
+      wx.showToast({ title: '已删除', icon: 'success' });
+    } catch(e) {
+      wx.hideLoading();
+      wx.showToast({ title: '删除失败', icon: 'none' });
+    }
   },
 
-  // 替换照片
+  // ↻ 替换照片
   async replacePhoto(e) {
     const idx = e.currentTarget.dataset.idx;
-    const photo = this.data.photos[idx];
+    const photoid = e.currentTarget.dataset.photoid;
     const propId = this.data.p.id;
     if (!propId) return;
     const apiBase = app.globalData.apiBase.replace('/api/fang', '');
     
-    // 先删除旧照片
-    if (photo && photo.id) {
-      await api.del('/upload/photos/' + photo.id);
-    }
-    
-    // 选择新照片上传
     wx.chooseMedia({
       count: 1, mediaType: ['image'],
       success: (res) => {
-        wx.showLoading({ title: '替换中...' });
-        wx.uploadFile({
-          url: apiBase + '/api/fang/upload/properties/' + propId,
-          filePath: res.tempFiles[0].tempFilePath,
-          name: 'photos',
-          header: { 'Authorization': 'Bearer ' + app.globalData.token },
-          success: (r) => {
-            wx.hideLoading();
-            try {
-              const result = JSON.parse(r.data);
-              if (result.code === 0 || result.success) {
-                wx.showToast({ title: '替换成功', icon: 'success' });
-                this.loadProperty(propId);
-              } else {
-                wx.showToast({ title: '替换失败', icon: 'none' });
-              }
-            } catch(e) {
-              this.loadProperty(propId);
+        wx.showLoading({ title: '上传中...' });
+        // 先删旧图
+        const deleteOld = photoid ? api.del('/upload/photos/' + photoid) : Promise.resolve();
+        deleteOld.then(() => {
+          wx.uploadFile({
+            url: apiBase + '/api/fang/upload/properties/' + propId,
+            filePath: res.tempFiles[0].tempFilePath,
+            name: 'photos',
+            header: { 'Authorization': 'Bearer ' + app.globalData.token },
+            success: (r) => {
+              wx.hideLoading();
               wx.showToast({ title: '替换成功', icon: 'success' });
-            }
-          },
-          fail: () => { wx.hideLoading(); wx.showToast({ title: '上传失败', icon: 'none' }); }
+              this.loadProperty(propId);
+            },
+            fail: () => { wx.hideLoading(); wx.showToast({ title: '上传失败', icon: 'none' }); }
+          });
+        }).catch(() => {
+          // 删除旧图失败但继续上传
+          wx.uploadFile({
+            url: apiBase + '/api/fang/upload/properties/' + propId,
+            filePath: res.tempFiles[0].tempFilePath,
+            name: 'photos',
+            header: { 'Authorization': 'Bearer ' + app.globalData.token },
+            success: (r) => { wx.hideLoading(); wx.showToast({ title: '替换成功', icon: 'success' }); this.loadProperty(propId); },
+            fail: () => { wx.hideLoading(); wx.showToast({ title: '上传失败', icon: 'none' }); }
+          });
         });
       }
     });
   },
 
-  // 设为封面
-  async setCover(idx) {
+  // 👆 点击图片设为封面
+  async setCover(e) {
+    const idx = e.currentTarget.dataset.idx;
     const photo = this.data.photos[idx];
-    if (!photo || !photo.id) {
-      wx.showToast({ title: '请先上传照片', icon: 'none' });
-      return;
-    }
+    if (!photo) return;
+    // 如果没有id，说明是刚上传的本地照片
+    const photoid = photo.id || e.currentTarget.dataset.photoid;
+    if (!photoid) { wx.showToast({ title: '请等待照片上传完成', icon: 'none' }); return; }
+    wx.showLoading({ title: '设为封面...' });
     try {
-      const r = await api.put('/upload/photos/' + photo.id, { is_primary: 1 });
+      const r = await api.put('/upload/photos/' + photoid, { is_primary: 1 });
+      wx.hideLoading();
       if (r.code === 0) {
-        wx.showToast({ title: '已设为封面', icon: 'success' });
+        wx.showToast({ title: '✅ 已设为封面', icon: 'success' });
         this.loadProperty(this.data.p.id);
       } else {
         wx.showToast({ title: r.msg || '设置失败', icon: 'none' });
       }
     } catch(e) {
+      wx.hideLoading();
       wx.showToast({ title: '设置失败', icon: 'none' });
     }
   },
