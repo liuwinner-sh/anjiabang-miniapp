@@ -1,0 +1,105 @@
+<scroll-view class="page" scroll-y>
+  <view class="page-hd">
+    <text class="page-title">📝 合同管理</text>
+    <text class="page-desc">租赁合同的新增、续签和备案管理</text>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="summary-card">
+    <view class="sc-item {{activeFilter==='all'?'sc-active':''}}" bindtap="onFilter" data-status="all">
+      <text class="sc-num">{{contractStats.active+contractStats.expiring+contractStats.expired}}</text>
+      <text class="sc-lbl">全部</text>
+    </view>
+    <view class="sc-item {{activeFilter==='active'?'sc-active':''}}" bindtap="onFilter" data-status="active">
+      <text class="sc-num">{{contractStats.active}}</text><text class="sc-lbl">进行中</text>
+    </view>
+    <view class="sc-item {{activeFilter==='expiring'?'sc-active':''}}" bindtap="onFilter" data-status="expiring">
+      <text class="sc-num sc-num-warn">{{contractStats.expiring}}</text><text class="sc-lbl">即将到期</text>
+    </view>
+    <view class="sc-item {{activeFilter==='expired'?'sc-active':''}}" bindtap="onFilter" data-status="expired">
+      <text class="sc-num sc-num-danger">{{contractStats.expired}}</text><text class="sc-lbl">已到期</text>
+    </view>
+  </view>
+
+  <view class="toolbar">
+    <button class="btn-add" bindtap="addContract">+ 新建合同</button>
+    <button class="btn-outline" bindtap="aiGenerate">🤖 AI生成</button>
+  </view>
+
+  <view class="filter-hint" wx:if="{{activeFilter!=='all'}}">
+    <text>当前筛选：{{activeFilter==='active'?'进行中':activeFilter==='expiring'?'即将到期':'已到期'}}</text>
+    <text class="filter-clear" bindtap="onFilter" data-status="all">清除</text>
+  </view>
+
+  <!-- 合同列表 -->
+  <view class="contract-list">
+    <view class="contract-item" wx:for="{{filteredTenants}}" wx:key="id" bindtap="viewContract" data-id="{{item.id}}">
+      <view class="ci-hd">
+        <text class="ci-name">{{item.name || '未命名'}}</text>
+        <text class="ci-status {{item.contractStatus}}">{{item.contractStatusText}}</text>
+      </view>
+      <text class="ci-prop">🏠 {{item.property_name || '未分配房源'}}</text>
+      <view class="ci-dates">
+        <text>💰 ¥{{item.rent_amount || '0'}}/月 · {{item.payment_type || '-'}}</text>
+        <text>📅 {{item.contract_end ? item.contract_end.slice(0,10) : '无期限'}}</text>
+      </view>
+      <view class="ci-actions" wx:if="{{item.contractStatus==='expiring' || item.contractStatus==='expired'}}" catchtap="renewContract" data-id="{{item.id}}">
+        <button class="btn-sm">续签</button>
+      </view>
+    </view>
+  </view>
+  <view class="empty" wx:if="{{filteredTenants.length===0}}"><text>暂无合同</text><button class="btn-add" bindtap="addContract">+ 新建合同</button></view>
+
+  <!-- ===== 新建合同弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showAdd}}" bindtap="closeAdd"></view>
+  <view class="modal" wx:if="{{showAdd}}">
+    <view class="modal-hd">
+      <text class="modal-title">📝 新建合同</text>
+      <text class="modal-close" bindtap="closeAdd">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="form-label">选择房源</text>
+      <picker mode="selector" range="{{properties}}" range-key="{{'name'}}" bindchange="onFormProp">
+        <view class="picker-box">{{formPropName || '请选择房源'}}</view>
+      </picker>
+      <text class="form-label">租客姓名</text>
+      <input class="form-input" placeholder="租客姓名" value="{{formTenant}}" bindinput="onFormField" data-f="formTenant"/>
+      <text class="form-label">联系电话</text>
+      <input class="form-input" placeholder="手机号" type="number" value="{{formPhone}}" bindinput="onFormField" data-f="formPhone"/>
+      <text class="form-label">月租金（元）</text>
+      <input class="form-input" placeholder="月租金" type="digit" value="{{formRent}}" bindinput="onFormField" data-f="formRent"/>
+      <text class="form-label">付款方式</text>
+      <picker mode="selector" range="{{paymentTypes}}" bindchange="onFormPayment">
+        <view class="picker-box">{{formPayment}}</view>
+      </picker>
+      <text class="form-label">押金（元）</text>
+      <input class="form-input" placeholder="押金金额" type="digit" value="{{formDeposit}}" bindinput="onFormField" data-f="formDeposit"/>
+      <text class="form-label">合同起始</text>
+      <input class="form-input" placeholder="如：2026-01-01" value="{{formStart}}" bindinput="onFormField" data-f="formStart"/>
+      <text class="form-label">合同到期</text>
+      <input class="form-input" placeholder="如：2027-01-01" value="{{formEnd}}" bindinput="onFormField" data-f="formEnd"/>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeAdd">取消</button>
+      <button class="btn-primary" bindtap="doAddContract">创建合同</button>
+    </view>
+  </view>
+
+  <!-- ===== AI生成合同弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showAI}}" bindtap="closeAI"></view>
+  <view class="modal ai-modal" wx:if="{{showAI}}">
+    <view class="modal-hd">
+      <text class="modal-title">🤖 AI生成合同</text>
+      <text class="modal-close" bindtap="closeAI">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="form-tip">基于已有房源和租客信息，AI自动生成规范租赁合同。将使用第一个房源和租客的信息。</text>
+      <button class="btn-primary" bindtap="doAiGenerate" loading="{{aiLoading}}" wx:if="{{!aiResult}}">
+        {{aiLoading ? 'AI生成中...' : '开始生成合同'}}
+      </button>
+      <scroll-view class="ai-result" scroll-y wx:if="{{aiResult}}">
+        <text>{{aiResult}}</text>
+      </scroll-view>
+    </view>
+  </view>
+</scroll-view>

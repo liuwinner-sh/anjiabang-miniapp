@@ -1,0 +1,77 @@
+<scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+  <view class="page-hd">
+    <text class="page-title">📊 财务报表</text>
+    <text class="page-desc">年度收支汇总与分析</text>
+  </view>
+
+  <!-- 年度汇总 -->
+  <view class="summary-row">
+    <view class="sum-card">
+      <text class="sum-lbl">年度总收入</text>
+      <text class="sum-num primary">¥{{yearStats.totalIncome}}</text>
+    </view>
+    <view class="sum-card">
+      <text class="sum-lbl">已收</text>
+      <text class="sum-num green">¥{{yearStats.collected}}</text>
+    </view>
+    <view class="sum-card">
+      <text class="sum-lbl">待收</text>
+      <text class="sum-num red">¥{{yearStats.pending}}</text>
+    </view>
+  </view>
+
+  <!-- 月份选择 -->
+  <view class="year-selector">
+    <text class="year-btn" bindtap="prevYear">‹</text>
+    <text class="year-text">{{year}}年</text>
+    <text class="year-btn" bindtap="nextYear">›</text>
+  </view>
+
+  <!-- 月度柱状图 -->
+  <view class="section">
+    <view class="section-hd">
+      <text class="section-title">📈 {{year}}年月度收支</text>
+      <text class="section-more">全年 ¥{{yearStats.totalIncome}}</text>
+    </view>
+    <view class="chart-container">
+      <view class="legend"><text class="dot blue"></text>已收 <text class="dot orange" style="margin-left:20rpx"></text>待收</view>
+      <view class="chart">
+        <view class="chart-col" wx:for="{{monthData}}" wx:for-index="idx" wx:key="idx" bindtap="viewMonth" data-month="{{item.month}}">
+          <view class="bars">
+            <view class="bar blue" style="height:{{item.collectedPct}}%" wx:if="{{item.collected>0}}">
+              <text class="bar-val">¥{{item.collectedStr}}</text>
+            </view>
+            <view class="bar orange" style="height:{{item.pendingPct}}%" wx:if="{{item.pending>0}}">
+              <text class="bar-val">¥{{item.pendingStr}}</text>
+            </view>
+          </view>
+          <text class="col-lbl">{{item.monthLabel}}</text>
+        </view>
+      </view>
+      <text class="chart-hint">👆 点击柱子查看该月明细</text>
+    </view>
+  </view>
+
+  <!-- 月度明细 -->
+  <view class="section">
+    <view class="section-hd"><text class="section-title">📋 {{year}}年月度明细</text></view>
+    <view class="month-item" wx:for="{{monthData}}" wx:key="idx">
+      <view class="mi-hd">
+        <text class="mi-month">{{item.monthLabel}}收入</text>
+        <text class="mi-total">¥{{item.total}}</text>
+      </view>
+      <view class="mi-detail">
+        <text>已收：¥{{item.collectedStr}}（{{item.rate}}%）</text>
+        <text wx:if="{{item.pending>0}}">待收：¥{{item.pendingStr}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-nav">
+    <view class="nav-item" bindtap="goDashboard"><text>🏠</text><text>首页</text></view>
+    <view class="nav-item" bindtap="goProperties"><text>🏘️</text><text>房源</text></view>
+    <view class="nav-item" bindtap="goBills"><text>💰</text><text>账单</text></view>
+    <view class="nav-item on"><text>📊</text><text>报表</text></view>
+    <view class="nav-item" bindtap="goSettings"><text>👤</text><text>我的</text></view>
+  </view>
+</scroll-view>

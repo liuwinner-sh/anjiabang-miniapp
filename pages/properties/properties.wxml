@@ -1,0 +1,25 @@
+<scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+  <view class="toolbar">
+    <input class="search" placeholder="搜索房源..." value="{{keyword}}" bindinput="onSearch"/>
+    <button class="btn-add" bindtap="addProperty">+ 添加</button>
+  </view>
+
+  <view class="list">
+    <view class="item" wx:for="{{list}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+      <view class="item-top">
+        <text class="item-name">{{item.name}}</text>
+        <text class="item-status {{item.status}}">{{item.status==='rented'?'已出租':item.status==='active'?'空置':item.status}}</text>
+      </view>
+      <text class="item-addr">{{item.address || '地址未填'}}</text>
+      <view class="item-bottom">
+        <text class="item-rent">¥{{item.rent||0}}/月</text>
+        <text class="item-tenant" wx:if="{{item.tenant_name}}">租客：{{item.tenant_name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{list.length===0}}">
+    <text>暂无房源</text>
+    <button class="btn-add" bindtap="addProperty">+ 添加第一套房源</button>
+  </view>
+</scroll-view>

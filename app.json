@@ -1,0 +1,27 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/dashboard/dashboard",
+    "pages/properties/properties",
+    "pages/property-detail/property-detail",
+    "pages/tenants/tenants",
+    "pages/bills/bills",
+    "pages/repairs/repairs",
+    "pages/filing/filing",
+    "pages/customers/customers",
+    "pages/utilities/utilities",
+    "pages/settings/settings",
+    "pages/report/report"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#2E6BFF",
+    "navigationBarTitleText": "AI安家帮",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F7FA",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": true
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

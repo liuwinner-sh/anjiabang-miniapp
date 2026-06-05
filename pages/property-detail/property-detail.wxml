@@ -1,0 +1,72 @@
+<scroll-view class="page" scroll-y>
+  <!-- 租客合同信息 -->
+  <view class="card tenant-card" wx:if="{{tenant.name}}">
+    <view class="section-hd"><text class="section-title">👤 当前租客</text></view>
+    <view class="t-info">
+      <view class="t-row"><text class="t-lbl">姓名</text><text class="t-val">{{tenant.name}}</text></view>
+      <view class="t-row"><text class="t-lbl">租金</text><text class="t-val">¥{{tenant.rent_amount}}/月（{{tenant.payment_type||'月付'}}）</text></view>
+      <view class="t-row" wx:if="{{tenant.deposit}}"><text class="t-lbl">押金</text><text class="t-val">¥{{tenant.deposit}}</text></view>
+      <view class="t-row" wx:if="{{tenant.move_in_date}}"><text class="t-lbl">入住</text><text class="t-val">{{tenant.move_in_date.slice(0,10)}}</text></view>
+      <view class="t-row"><text class="t-lbl">合同到期</text><text class="t-val {{tenant.daysLeft<=30?'urgent':''}}">{{tenant.endDisplay || '未设置'}}</text></view>
+      <view class="t-row" wx:if="{{tenant.daysLeft>0 && tenant.daysLeft<=30}}">
+        <text class="t-lbl"></text>
+        <text class="t-val urgent">⚠️ {{tenant.daysLeft}}天后到期，请及时处理</text>
+      </view>
+      <view class="t-row" wx:if="{{tenant.daysLeft<=0}}">
+        <text class="t-lbl"></text>
+        <text class="t-val expired">⚠️ 已到期{{Math.abs(tenant.daysLeft)}}天</text>
+      </view>
+    </view>
+    <view class="t-actions">
+      <button class="btn-renew" bindtap="renewContract">续签合同（延长1年）</button>
+      <button class="btn-view-bills" bindtap="goTenantBills">查看账单</button>
+    </view>
+  </view>
+
+  <!-- 照片 -->
+  <view class="card" wx:if="{{p.id}}">
+    <view class="section-hd"><text class="section-title">📷 房源照片</text><text class="section-more" bindtap="uploadPhoto">+ 添加</text></view>
+    <scroll-view class="photo-scroll" scroll-x>
+      <view class="photo-item" wx:for="{{photos}}" wx:key="id">
+        <image src="{{item.url || item}}" mode="aspectFill" class="photo-img"/>
+        <text class="photo-del" bindtap="delPhoto" data-idx="{{idx}}">×</text>
+      </view>
+      <view class="photo-add" bindtap="uploadPhoto"><text>+</text></view>
+    </scroll-view>
+    <view class="photo-empty" wx:if="{{photos.length===0}}"><text>暂无照片，点击添加</text></view>
+  </view>
+
+  <!-- AI 工具按钮 -->
+  <view class="card ai-tools" wx:if="{{p.id}}">
+    <view class="section-hd"><text class="section-title">🤖 AI 工具</text></view>
+    <view class="ai-btn-row">
+      <button class="btn-ai" bindtap="generateAIDesc" loading="{{aiLoading}}" disabled="{{aiLoading}}">✨ AI生成描述</button>
+      <button class="btn-dist" bindtap="distribute" loading="{{distLoading}}" disabled="{{distLoading}}">📤 分发</button>
+    </view>
+    <view class="ai-result" wx:if="{{aiResult}}">
+      <text class="ai-result-label">AI描述结果：</text>
+      <text class="ai-result-text">{{aiResult}}</text>
+      <button class="btn-copy" bindtap="copyResult">📋 复制</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="fld"><text class="lbl">房源名称</text><input class="inp" value="{{p.name}}" bindinput="onField" data-f="name" placeholder="如：徐汇区XX小区A栋"/></view>
+    <view class="fld"><text class="lbl">地址</text><input class="inp" value="{{p.address}}" bindinput="onField" data-f="address" placeholder="详细地址"/></view>
+    <view class="fld-row">
+      <view class="fld"><text class="lbl">城市</text><input class="inp" value="{{p.city}}" bindinput="onField" data-f="city" placeholder="城市"/></view>
+      <view class="fld"><text class="lbl">租金(元/月)</text><input class="inp" value="{{p.rent}}" bindinput="onField" data-f="rent" type="number" placeholder="月租金"/></view>
+    </view>
+    <view class="fld-row">
+      <view class="fld"><text class="lbl">面积(㎡)</text><input class="inp" value="{{p.area}}" bindinput="onField" data-f="area" type="digit" placeholder="面积"/></view>
+      <view class="fld"><text class="lbl">户型</text>
+        <picker class="inp" mode="selector" range="{{roomTypes}}" bindchange="onRoomChange">
+          <text>{{p.roomDisplay || '请选择户型'}}</text>
+        </picker>
+      </view>
+    </view>
+    <view class="fld"><text class="lbl">备注</text><input class="inp" value="{{p.remark}}" bindinput="onField" data-f="remark" placeholder="备注信息"/></view>
+    <button class="btn-save" bindtap="save">保存</button>
+    <button class="btn-del" wx:if="{{p.id}}" bindtap="del">删除此房源</button>
+  </view>
+</scroll-view>

@@ -1,0 +1,107 @@
+<scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+  <view class="page-hd">
+    <text class="page-title">👤 客户管理</text>
+    <text class="page-desc">AI智能标签、聊天总结、自动回复</text>
+  </view>
+
+  <!-- 筛选 -->
+  <view class="filter-bar">
+    <view class="filter-item {{filterStatus==='all'?'f-active':''}}" bindtap="filterBy" data-status="all">全部</view>
+    <view class="filter-item {{filterStatus==='new'?'f-active':''}}" bindtap="filterBy" data-status="new">新客</view>
+    <view class="filter-item {{filterStatus==='contacted'?'f-active':''}}" bindtap="filterBy" data-status="contacted">已联系</view>
+    <view class="filter-item {{filterStatus==='interested'?'f-active':''}}" bindtap="filterBy" data-status="interested">有意向</view>
+    <view class="filter-item {{filterStatus==='closed'?'f-active':''}}" bindtap="filterBy" data-status="closed">已成交</view>
+  </view>
+
+  <!-- 新增按钮 -->
+  <button class="btn-add-full" bindtap="openAdd">
+    <text>+ 新增客户（AI自动打标签）</text>
+    <text class="btn-sub">输入姓名和需求，AI自动分析客户画像</text>
+  </button>
+
+  <!-- 客户列表 -->
+  <view class="list">
+    <view class="card" wx:for="{{filteredList}}" wx:key="id">
+      <view class="card-top">
+        <view>
+          <text class="card-name">{{item.name || '未命名'}}</text>
+          <text class="card-phone" wx:if="{{item.phone}}">{{item.phone}}</text>
+        </view>
+        <text class="card-status {{item._statusClass}}">{{item._statusText}}</text>
+      </view>
+      <text class="card-demand" wx:if="{{item.demand}}">{{item.demand}}</text>
+      <view class="card-tags">
+        <text class="tag tag-orange" wx:for="{{item._tags}}" wx:key="this">{{item}}</text>
+        <text class="tag tag-blue" wx:if="{{item._budget}}">{{item._budget}}</text>
+        <text class="tag tag-gray" wx:if="{{item.preferred_city}}">{{item.preferred_city}}</text>
+      </view>
+      <view class="card-bottom">
+        <text class="card-time">最后联系：{{item._lastContact}}</text>
+        <view class="card-actions">
+          <button class="btn-tiny btn-blue" bindtap="openChat" data-id="{{item.id}}">🤖 AI助手</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="empty" wx:if="{{filteredList.length===0}}"><text>暂无客户</text></view>
+
+  <!-- ===== 新增弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showAdd}}" bindtap="closeAdd"></view>
+  <view class="modal" wx:if="{{showAdd}}">
+    <view class="modal-hd">
+      <text class="modal-title">➕ 新增客户</text>
+      <text class="modal-close" bindtap="closeAdd">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="form-label">客户姓名</text>
+      <input class="form-input" placeholder="姓名" value="{{formName}}" bindinput="onName"/>
+      <text class="form-label">联系电话</text>
+      <input class="form-input" placeholder="手机号" type="number" value="{{formPhone}}" bindinput="onPhone"/>
+      <text class="form-label">需求描述（AI自动分析标签）</text>
+      <textarea class="form-input area" placeholder="例如：想在浦东找一套两居室，预算5000以内，近地铁" value="{{formDemand}}" bindinput="onDemand"></textarea>
+      <text class="form-tip">提交后AI会自动分析客户画像：预算范围、意向区域、标签等</text>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeAdd">取消</button>
+      <button class="btn-primary" bindtap="doAdd" loading="{{isAdding}}">{{isAdding?'AI分析中...':'提交并AI分析'}}</button>
+    </view>
+  </view>
+
+  <!-- ===== AI智能助手弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showChat}}" bindtap="closeChat"></view>
+  <view class="modal chat-modal" wx:if="{{showChat}}">
+    <view class="modal-hd">
+      <text class="modal-title">🤖 AI助手 - {{curCustomer.name}}</text>
+      <text class="modal-close" bindtap="closeChat">✕</text>
+    </view>
+    <view class="modal-bd">
+      <!-- 聊天总结 -->
+      <view class="chat-section">
+        <text class="chat-section-title">📝 聊天总结</text>
+        <textarea class="form-input area" placeholder="粘贴与客户的聊天记录，AI自动总结要点和待办事项" value="{{chatMessages}}" bindinput="onChatInput"></textarea>
+        <button class="btn-primary btn-sm-block" bindtap="doSummarize" loading="{{isSummarizing}}">{{isSummarizing?'AI分析中...':'AI分析总结'}}</button>
+        <view class="summary-box" wx:if="{{chatSummary}}">
+          <text class="summary-text">{{chatSummary}}</text>
+          <view class="mood-tag" wx:if="{{chatMood}}">
+            <text>客户情绪：</text><text class="tag {{chatMood==='积极'?'tag-green':chatMood==='消极'?'tag-orange':'tag-blue'}}">{{chatMood}}</text>
+          </view>
+          <view class="action-list" wx:if="{{chatActions.length>0}}">
+            <text class="action-title">待办事项：</text>
+            <text class="action-item" wx:for="{{chatActions}}" wx:key="this">• {{item}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- AI自动回复 -->
+      <view class="chat-section">
+        <text class="chat-section-title">💬 AI自动回复</text>
+        <textarea class="form-input area" placeholder="输入客户发来的消息，AI帮您拟定回复" value="{{replyMsg}}" bindinput="onReplyInput"></textarea>
+        <button class="btn-primary btn-sm-block" bindtap="doAutoReply">生成回复</button>
+        <view class="reply-box" wx:if="{{autoReply}}">
+          <text class="reply-text">{{autoReply}}</text>
+          <button class="btn-tiny btn-outline" bindtap="copyReply">📋 复制</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</scroll-view>

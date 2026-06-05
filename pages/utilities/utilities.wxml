@@ -1,0 +1,99 @@
+<scroll-view class="page" scroll-y>
+  <view class="page-hd">
+    <text class="page-title">🔌 水电煤管理</text>
+    <text class="page-desc">水电燃气的抄表、用量追踪和智能分析</text>
+  </view>
+
+  <!-- 房源选择 -->
+  <view class="section">
+    <text class="sec-label">选择房源</text>
+    <picker mode="selector" range="{{properties}}" range-key="{{'name'}}" value="{{curPropIdx}}" bindchange="onPropChange">
+      <view class="picker-box">{{curProperty?curProperty.name:'请选择'}}</view>
+    </picker>
+  </view>
+
+  <!-- 已绑定的仪表账户 -->
+  <view class="section" wx:if="{{curProperty}}">
+    <view class="sec-hd">
+      <text class="sec-label">仪表账户</text>
+      <button class="btn-tiny" bindtap="openBind">+ 绑定</button>
+    </view>
+    <view class="card" wx:for="{{accounts}}" wx:key="id" wx:for-item="ac">
+      <view class="card-top">
+        <text class="ac-type">{{getTypeName(ac.utility_type)}}</text>
+        <text class="ac-num">户号 {{ac.account_number || '-'}}</text>
+      </view>
+      <view class="ac-reading" wx:if="{{latestReadings.length>0}}">
+        <text class="ac-val" wx:for="{{latestReadings}}" wx:key="id" wx:for-item="mr" wx:if="{{mr.utility_account_id===ac.id}}">
+          当前读数：<text class="num">{{mr.reading_value}}</text>（{{mr.reading_date}}）
+        </text>
+      </view>
+      <view class="ac-notice" wx:if="{{!ac._hasReading}}">
+        <text>暂无抄表记录，请录入首次读数</text>
+      </view>
+      <view class="card-actions">
+        <button class="btn-tiny btn-blue" bindtap="openMeter" data-acid="{{ac.id}}">📷 录入读数</button>
+        <button class="btn-tiny btn-outline" bindtap="viewHistory" data-acid="{{ac.id}}">📊 历史</button>
+      </view>
+    </view>
+    <view class="empty-sm" wx:if="{{accounts.length===0}}">
+      <text>尚未绑定水电煤账户</text>
+      <button class="btn-tiny btn-blue" bindtap="openBind">+ 立即绑定</button>
+    </view>
+  </view>
+
+  <!-- 历史读数 -->
+  <view class="section" wx:if="{{readingHistory.length>0}}">
+    <view class="sec-hd">
+      <text class="sec-label">📊 抄表历史</text>
+      <button class="btn-tiny btn-outline" bindtap="hideHistory">收起</button>
+    </view>
+    <view class="hist-list">
+      <view class="hist-item" wx:for="{{readingHistory}}" wx:key="id">
+        <text class="hist-date">{{item.reading_date}}</text>
+        <text class="hist-val">读数 {{item.reading_value}}</text>
+        <text class="hist-usage" wx:if="{{item.consumption!==null}}">用量 {{item.consumption}}</text>
+        <text class="hist-first" wx:if="{{item.consumption===null}}">首次</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 绑定弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showBind}}" bindtap="closeBind"></view>
+  <view class="modal" wx:if="{{showBind}}">
+    <view class="modal-hd">
+      <text class="modal-title">🔗 绑定仪表账户</text>
+      <text class="modal-close" bindtap="closeBind">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="form-label">仪表类型</text>
+      <picker mode="selector" range="{{['electricity','water','gas']}}" range-key="{{''}}" bindchange="onBindType">
+        <view class="picker-box">{{bindType==='electricity'?'电表':bindType==='water'?'水表':'燃气表'}}</view>
+      </picker>
+      <text class="form-label">户号</text>
+      <input class="form-input" placeholder="请输入户号/账号" value="{{bindAccount}}" bindinput="onBindAccount"/>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeBind">取消</button>
+      <button class="btn-primary" bindtap="doBind">确认绑定</button>
+    </view>
+  </view>
+
+  <!-- ===== 抄表弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showMeter}}" bindtap="closeMeter"></view>
+  <view class="modal" wx:if="{{showMeter}}">
+    <view class="modal-hd">
+      <text class="modal-title">📝 录入表读数</text>
+      <text class="modal-close" bindtap="closeMeter">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="form-label">当前读数</text>
+      <input class="form-input" placeholder="请输入当前表上的读数（数字）" type="digit" value="{{meterReading}}" bindinput="onMeterInput"/>
+      <text class="form-tip">系统将自动计算本次用量 = 当前读数 - 上次读数</text>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeMeter">取消</button>
+      <button class="btn-primary" bindtap="submitMeter" loading="{{submittingMeter}}">{{submittingMeter?'录入中...':'提交读数'}}</button>
+    </view>
+  </view>
+</scroll-view>

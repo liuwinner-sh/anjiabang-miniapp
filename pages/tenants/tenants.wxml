@@ -1,0 +1,68 @@
+<scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+  <view class="toolbar">
+    <input class="search" placeholder="搜索租客姓名..." value="{{keyword}}" bindinput="onSearch"/>
+    <button class="btn-add" bindtap="addTenant">+ 添加</button>
+  </view>
+  <view class="list">
+    <view class="item" wx:for="{{list}}" wx:key="id">
+      <view class="item-top">
+        <text class="item-name">{{item.name}}</text>
+        <text class="item-status tag-success">在住</text>
+      </view>
+      <text class="item-info" wx:if="{{item.property_name}}">🏠 {{item.property_name}}</text>
+      <text class="item-info">{{item.phone || '-'}}</text>
+      <text class="item-info" wx:if="{{item.rent_amount}}">💰 ¥{{item.rent_amount}}/月 · {{item.payment_type || '月付'}}</text>
+      <text class="item-info" wx:if="{{item.contract_end}}">📅 合同至：{{item.contract_end.slice(0,10)}}</text>
+      <view class="item-actions">
+        <button class="btn-sm" bindtap="editTenant" data-id="{{item.id}}">编辑</button>
+        <button class="btn-sm btn-danger" bindtap="delTenant" data-id="{{item.id}}">删除</button>
+      </view>
+    </view>
+  </view>
+  <view class="empty" wx:if="{{list.length===0}}"><text>暂无租客</text></view>
+
+  <!-- ===== 编辑租客弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showEdit}}" bindtap="closeEdit"></view>
+  <view class="modal" wx:if="{{showEdit}}">
+    <view class="modal-hd">
+      <text class="modal-title">{{editId ? '✏️ 编辑租客' : '➕ 添加租客'}}</text>
+      <text class="modal-close" bindtap="closeEdit">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="form-label">姓名</text>
+      <input class="form-input" placeholder="租客姓名" value="{{editName}}" bindinput="onEditField" data-f="Name"/>
+
+      <text class="form-label">手机号</text>
+      <input class="form-input" placeholder="手机号" type="number" value="{{editPhone}}" bindinput="onEditField" data-f="Phone"/>
+
+      <text class="form-label">关联房源</text>
+      <picker mode="selector" range="{{properties}}" range-key="name" value="{{editPropertyIdx}}" bindchange="onEditPropChange">
+        <view class="picker-box">{{editPropertyName || '请选择房源'}}</view>
+      </picker>
+
+      <text class="form-label">月租金（元）</text>
+      <input class="form-input" placeholder="月租金" type="digit" value="{{editRent}}" bindinput="onEditField" data-f="Rent"/>
+
+      <text class="form-label">付款方式</text>
+      <picker mode="selector" range="{{paymentTypes}}" bindchange="onEditPaymentChange">
+        <view class="picker-box">{{editPayment}}</view>
+      </picker>
+
+      <text class="form-label">押金（元）</text>
+      <input class="form-input" placeholder="押金金额" type="digit" value="{{editDeposit}}" bindinput="onEditField" data-f="Deposit"/>
+
+      <text class="form-label">合同起始日</text>
+      <input class="form-input" placeholder="如：2026-05-01" value="{{editContractStart}}" bindinput="onEditField" data-f="ContractStart"/>
+
+      <text class="form-label">合同到期日</text>
+      <input class="form-input" placeholder="如：2027-05-01" value="{{editContractEnd}}" bindinput="onEditField" data-f="ContractEnd"/>
+
+      <text class="form-label">备注</text>
+      <input class="form-input" placeholder="备注信息" value="{{editNotes}}" bindinput="onEditField" data-f="Notes"/>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeEdit">取消</button>
+      <button class="btn-primary" bindtap="saveEdit">保存</button>
+    </view>
+  </view>
+</scroll-view>

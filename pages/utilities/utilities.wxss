@@ -1,0 +1,53 @@
+.page { padding: 30rpx; background: #F5F7FA; min-height: 100vh; }
+.page-hd { margin-bottom: 20rpx; }
+.page-title { font-size: 36rpx; font-weight: 700; }
+.page-desc { font-size: 24rpx; color: #6B7A8D; margin-top: 6rpx; }
+
+.section { margin-bottom: 24rpx; }
+.sec-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
+.sec-label { font-size: 28rpx; font-weight: 600; color: #333; display: block; margin-bottom: 8rpx; }
+.sec-hd .sec-label { margin-bottom: 0; }
+
+/* 选择器 */
+.picker-box { padding: 20rpx; background: #fff; border-radius: 12rpx; font-size: 26rpx; color: #333; box-shadow: 0 2rpx 8rpx rgba(0,0,0,.04); }
+
+/* 卡片 */
+.card { background: #fff; border-radius: 16rpx; padding: 24rpx; margin-bottom: 12rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,.04); }
+.card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
+.ac-type { font-size: 28rpx; font-weight: 700; color: #2E6BFF; }
+.ac-num { font-size: 22rpx; color: #6B7A8D; }
+.ac-reading { padding: 12rpx 16rpx; background: #E8F0FF; border-radius: 12rpx; margin-bottom: 12rpx; font-size: 24rpx; color: #333; }
+.ac-reading .num { font-size: 32rpx; font-weight: 700; color: #2E6BFF; }
+.ac-notice { font-size: 22rpx; color: #D4880F; margin-bottom: 12rpx; }
+.card-actions { display: flex; gap: 12rpx; }
+
+/* 小按钮 */
+.btn-tiny { padding: 10rpx 24rpx; border: none; border-radius: 8rpx; font-size: 22rpx; }
+.btn-blue { background: #2E6BFF; color: #fff; }
+.btn-outline { background: #F5F7FA; color: #2E6BFF; border: 2rpx solid #E0E4EA; }
+
+/* 历史记录 */
+.hist-list { background: #fff; border-radius: 16rpx; overflow: hidden; }
+.hist-item { display: flex; padding: 16rpx 20rpx; border-bottom: 2rpx solid #F0F2F5; font-size: 24rpx; align-items: center; gap: 16rpx; }
+.hist-date { color: #6B7A8D; min-width: 120rpx; }
+.hist-val { flex: 1; color: #333; }
+.hist-usage { color: #2E6BFF; font-weight: 500; }
+.hist-first { color: #999; font-size: 20rpx; }
+.empty-sm { text-align: center; padding: 40rpx; background: #fff; border-radius: 16rpx; color: #6B7A8D; font-size: 24rpx; }
+.empty-sm .btn-tiny { margin-top: 12rpx; }
+
+/* 弹窗 */
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; }
+.modal { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 24rpx 24rpx 0 0; z-index: 101; padding: 30rpx; }
+.modal-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
+.modal-title { font-size: 32rpx; font-weight: 700; }
+.modal-close { font-size: 36rpx; color: #999; padding: 8rpx; }
+.modal-bd { margin-bottom: 24rpx; }
+.modal-ft { display: flex; gap: 16rpx; }
+
+.form-label { display: block; font-size: 26rpx; color: #333; font-weight: 500; margin-bottom: 8rpx; margin-top: 20rpx; }
+.form-input { width: 100%; padding: 20rpx; background: #F5F7FA; border: none; border-radius: 12rpx; font-size: 26rpx; box-sizing: border-box; color: #333; }
+.form-tip { display: block; font-size: 22rpx; color: #999; margin-top: 8rpx; }
+
+.btn-primary { flex: 1; padding: 22rpx; background: #2E6BFF; color: #fff; border: none; border-radius: 12rpx; font-size: 28rpx; font-weight: 600; }
+.btn-cancel { flex: 1; padding: 22rpx; background: #F5F7FA; color: #6B7A8D; border: none; border-radius: 12rpx; font-size: 28rpx; }

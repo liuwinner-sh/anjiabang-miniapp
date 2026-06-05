@@ -1,0 +1,29 @@
+.page { padding: 30rpx; background: #F5F7FA; min-height: 100vh; }
+.toolbar { display: flex; gap: 16rpx; margin-bottom: 24rpx; }
+.search { flex: 1; padding: 20rpx 24rpx; border: 2rpx solid #E4E9F0; border-radius: 12rpx; font-size: 26rpx; background: #fff; }
+.btn-add { padding: 20rpx 30rpx; background: #2E6BFF; color: #fff; border: none; border-radius: 12rpx; font-size: 28rpx; font-weight: 600; white-space: nowrap; line-height: 1.4; }
+.list { background: #fff; border-radius: 16rpx; overflow: hidden; }
+.item { padding: 28rpx 24rpx; border-bottom: 2rpx solid #F0F2F5; }
+.item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8rpx; }
+.item-name { font-size: 30rpx; font-weight: 600; }
+.item-status { font-size: 22rpx; padding: 4rpx 16rpx; border-radius: 20rpx; }
+.tag-success { background: #E1F5EE; color: #0F6E56; }
+.item-info { font-size: 24rpx; color: #6B7A8D; display: block; margin-top: 4rpx; }
+.item-actions { display: flex; gap: 12rpx; margin-top: 12rpx; }
+.btn-sm { padding: 12rpx 24rpx; background: #E8F0FF; color: #2E6BFF; border: none; border-radius: 8rpx; font-size: 24rpx; }
+.btn-danger { background: #FCEBEB; color: #FF6B6B; }
+.empty { text-align: center; padding: 80rpx 0; color: #6B7A8D; font-size: 28rpx; }
+
+/* 弹窗 */
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; }
+.modal { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 24rpx 24rpx 0 0; z-index: 101; padding: 30rpx; max-height: 80vh; overflow-y: auto; }
+.modal-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
+.modal-title { font-size: 32rpx; font-weight: 700; }
+.modal-close { font-size: 36rpx; color: #999; padding: 8rpx; }
+.modal-bd { margin-bottom: 24rpx; }
+.modal-ft { display: flex; gap: 16rpx; }
+.form-label { display: block; font-size: 26rpx; color: #333; font-weight: 500; margin-bottom: 8rpx; margin-top: 20rpx; }
+.form-input { width: 100%; padding: 20rpx; background: #F5F7FA; border: none; border-radius: 12rpx; font-size: 26rpx; box-sizing: border-box; color: #333; }
+.picker-box { padding: 20rpx; background: #F5F7FA; border-radius: 12rpx; font-size: 26rpx; color: #333; }
+.btn-primary { flex: 1; padding: 22rpx; background: #2E6BFF; color: #fff; border: none; border-radius: 12rpx; font-size: 28rpx; font-weight: 600; }
+.btn-cancel { flex: 1; padding: 22rpx; background: #F5F7FA; color: #6B7A8D; border: none; border-radius: 12rpx; font-size: 28rpx; }

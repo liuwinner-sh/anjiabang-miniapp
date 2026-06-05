@@ -1,0 +1,131 @@
+<scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+
+  <!-- 顶部统计 -->
+  <view class="stats-bar">
+    <view class="stat-card total">
+      <text class="stat-num">{{totalIncomeStr}}</text>
+      <text class="stat-lbl">总收入</text>
+    </view>
+    <view class="stat-card paid">
+      <text class="stat-num">{{totalPaidStr}}</text>
+      <text class="stat-lbl">已收款</text>
+    </view>
+    <view class="stat-card pending" wx:if="{{totalPending>0}}">
+      <text class="stat-num warn">{{totalPendingStr}}</text>
+      <text class="stat-lbl">待收款</text>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="toolbar">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input class="search-input" placeholder="搜索房源或月份..." value="{{keyword}}" bindinput="onSearch"/>
+    </view>
+    <button class="btn-add" bindtap="addBill">+ 记一笔</button>
+  </view>
+
+  <!-- 账单列表 -->
+  <view class="bill-list">
+    <view class="bill-item" wx:for="{{list}}" wx:for-index="idx" wx:key="id">
+      <view class="bill-body" bindtap="editBill" data-idx="{{idx}}">
+        <view class="bill-left">
+          <view class="bill-type-icon">
+            <text wx:if="{{item.bill_type==='electricity'}}">⚡</text>
+            <text wx:elif="{{item.bill_type==='water'}}">💧</text>
+            <text wx:elif="{{item.bill_type==='gas'}}">🔥</text>
+            <text wx:else>🏠</text>
+          </view>
+          <view class="bill-info">
+            <text class="bill-prop">{{item.property_name || '-'}}</text>
+            <text class="bill-month">{{item.monthDisplay}}</text>
+          </view>
+        </view>
+        <view class="bill-right">
+          <text class="bill-amount {{item.status}}">{{item.amountStr}}</text>
+          <view class="bill-status {{item.status}}">
+            <text wx:if="{{item.status==='paid'}}">✓ 已收</text>
+            <text wx:else>⏳ 待收</text>
+          </view>
+        </view>
+      </view>
+      <view class="bill-actions">
+        <button class="act-btn edit" bindtap="editBill" data-idx="{{idx}}">✏️ 编辑</button>
+        <button class="act-btn pay" wx:if="{{item.status==='pending'}}" bindtap="markPaid" data-id="{{item.id}}">✓ 标记已收</button>
+        <button class="act-btn del" bindtap="delBill" data-idx="{{idx}}">🗑 删除</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{list.length===0}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无账单数据</text>
+    <text class="empty-sub">点击"+ 记一笔"添加租金记录</text>
+  </view>
+
+  <!-- ===== 记一笔弹窗 ===== -->
+  <view class="mask" wx:if="{{showAdd}}" bindtap="closeAdd"></view>
+  <view class="modal" wx:if="{{showAdd}}">
+    <view class="modal-hd">
+      <text class="modal-title">💰 记一笔账单</text>
+      <text class="modal-close" bindtap="closeAdd">✕</text>
+    </view>
+    <view class="modal-bd">
+      <view class="form-group">
+        <text class="form-label">选择房源</text>
+        <picker mode="selector" range="{{addProperties}}" range-key="name" bindchange="onAddPropChange">
+          <view class="picker-box">{{addPropName || '请选择房源（自动填入租金）'}}</view>
+        </picker>
+      </view>
+      <view class="form-group">
+        <text class="form-label">金额（元）</text>
+        <input class="form-input" placeholder="自动填入合同租金" type="digit" value="{{addAmount}}" bindinput="onAddAmount"/>
+      </view>
+      <view class="form-group">
+        <text class="form-label">账单月份</text>
+        <input class="form-input" placeholder="如：2026-06" value="{{addMonth}}" bindinput="onAddMonth"/>
+      </view>
+      <view class="form-group">
+        <text class="form-label">备注</text>
+        <input class="form-input" placeholder="租客姓名或备注（选填）" value="{{addTenant}}" bindinput="onAddTenant"/>
+      </view>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeAdd">取消</button>
+      <button class="btn-primary" bindtap="doAddBill">保存</button>
+    </view>
+  </view>
+
+  <!-- ===== 编辑弹窗 ===== -->
+  <view class="mask" wx:if="{{showEdit}}" bindtap="closeAdd"></view>
+  <view class="modal" wx:if="{{showEdit}}">
+    <view class="modal-hd">
+      <text class="modal-title">✏️ 编辑账单</text>
+      <text class="modal-close" bindtap="closeAdd">✕</text>
+    </view>
+    <view class="modal-bd">
+      <view class="form-group" wx:if="{{editItem}}">
+        <text class="form-label">房源</text>
+        <text class="form-static">{{editItem.property_name}}</text>
+      </view>
+      <view class="form-group">
+        <text class="form-label">金额（元）</text>
+        <input class="form-input" type="digit" value="{{editAmount}}" bindinput="onEditAmount"/>
+      </view>
+      <view class="form-group">
+        <text class="form-label">账单月份</text>
+        <input class="form-input" placeholder="如：2026-06" value="{{editMonth}}" bindinput="onEditMonth"/>
+      </view>
+      <view class="form-group" wx:if="{{editItem}}">
+        <text class="form-label">状态</text>
+        <picker mode="selector" range="{{['已收款','待收款']}}" bindchange="onEditStatusChange">
+          <view class="picker-box">{{editStatus==='paid' ? '已收款' : '待收款'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeAdd">取消</button>
+      <button class="btn-primary" bindtap="doEditBill">保存</button>
+    </view>
+  </view>
+</scroll-view>

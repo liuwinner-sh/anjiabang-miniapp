@@ -1,0 +1,264 @@
+const api = require('../../utils/api');
+const app = getApp();
+
+Page({
+  data: {
+    p: { name: '', address: '', city: '', rent: '', area: '', room: 1, hall: 1, roomDisplay: '1室1厅', remark: '', id: 0 },
+    photos: [],
+    roomTypes: ['1室0厅','1室1厅','2室1厅','2室2厅','3室1厅','3室2厅','4室2厅','5室3厅'],
+    tenant: {},
+    aiLoading: false,
+    distLoading: false,
+    aiResult: ''
+  },
+
+  onLoad(opts) {
+    const id = parseInt(opts.id);
+    if (id) this.loadProperty(id);
+  },
+
+  async loadProperty(id) {
+    try {
+      const [pRes, photoRes, tRes] = await Promise.all([
+        api.get('/properties/' + id),
+        api.get('/upload/properties/' + id),
+        api.get('/tenants?page=1&pageSize=100')
+      ]);
+      const p = pRes.code === 0 ? (pRes.data || pRes) : {};
+      // 照片列表：API返回 {code:0, data:[{id,url,...}]} 或直接数组
+      const base = 'https://adequate-drums-wright-effective.trycloudflare.com';
+      let photos = [];
+      let rawPhotos = [];
+      if (Array.isArray(photoRes.data)) {
+        rawPhotos = photoRes.data;
+      } else if (Array.isArray(photoRes)) {
+        rawPhotos = photoRes;
+      } else if (Array.isArray(photoRes.photos)) {
+        rawPhotos = photoRes.photos;
+      }
+      photos = rawPhotos.map(ph => ({
+        ...ph,
+        url: ph.url && !ph.url.startsWith('http') ? base + ph.url : ph.url
+      }));
+      const rd = p.room && p.hall ? `${p.room}室${p.hall}厅` : '1室1厅';
+      
+      // 查找该房源的租客
+      const tenants = tRes.data?.list || [];
+      const tenant = tenants.find(t => t.property_id === id) || {};
+      if (tenant.contract_end) {
+        const now = new Date();
+        const end = new Date(tenant.contract_end);
+        tenant.daysLeft = Math.ceil((end - now) / 86400000);
+        tenant.endDisplay = tenant.contract_end.slice(0, 10);
+      }
+      
+      this.setData({ p: { ...p, roomDisplay: rd }, photos, tenant });
+    } catch(e) { console.error(e); }
+  },
+
+  onField(e) {
+    const f = e.currentTarget.dataset.f;
+    this.setData({ ['p.' + f]: e.detail.value });
+  },
+
+  onRoomChange(e) {
+    const val = this.data.roomTypes[e.detail.value];
+    const parts = val.match(/(\d+)室(\d+)厅/);
+    if (parts) {
+      this.setData({
+        'p.room': parseInt(parts[1]),
+        'p.hall': parseInt(parts[2]),
+        'p.roomDisplay': val
+      });
+    }
+  },
+
+  async save() {
+    const p = this.data.p;
+    if (!p.name) { wx.showToast({ title: '请输入房源名称', icon: 'none' }); return; }
+    wx.showLoading({ title: '保存中...' });
+    try {
+      const data = { name: p.name, address: p.address, city: p.city, rent: parseFloat(p.rent) || 0, area: parseFloat(p.area) || 0, room: p.room || 1, hall: p.hall || 1, remark: p.remark || '' };
+      let res;
+      if (p.id) res = await api.put('/properties/' + p.id, data);
+      else res = await api.post('/properties', data);
+      if (res.code === 0) {
+        wx.hideLoading();
+        wx.showToast({ title: '保存成功', icon: 'success' });
+        // 如果是新增，跳到编辑页继续添加照片
+        if (!p.id && res.data && res.data.id) {
+          wx.redirectTo({ url: '/pages/property-detail/property-detail?id=' + res.data.id });
+        } else {
+          wx.navigateBack();
+        }
+      } else { wx.hideLoading(); wx.showToast({ title: res.msg || '保存失败', icon: 'none' }); }
+    } catch(e) { wx.hideLoading(); wx.showToast({ title: '保存失败', icon: 'none' }); }
+  },
+
+  uploadPhoto() {
+    const propId = this.data.p.id;
+    if (!propId) { wx.showToast({ title: '请先保存房源', icon: 'none' }); return; }
+    const apiBase = app.globalData.apiBase.replace('/api/fang', '');
+    wx.chooseMedia({
+      count: 9, mediaType: ['image'],
+      success: (res) => {
+        const files = res.tempFiles.map(f => f.tempFilePath);
+        wx.showLoading({ title: '上传中...' });
+        const uploadTasks = files.map(file => {
+          return new Promise((resolve, reject) => {
+            wx.uploadFile({
+              url: apiBase + '/api/fang/upload/properties/' + propId,
+              filePath: file,
+              name: 'photos',
+              header: { 'Authorization': 'Bearer ' + app.globalData.token },
+              success: (r) => {
+                try { resolve(JSON.parse(r.data)); } catch(e) { resolve(null); }
+              },
+              fail: reject
+            });
+          });
+        });
+        Promise.all(uploadTasks).then((results) => {
+          wx.hideLoading();
+          wx.showToast({ title: '上传完成', icon: 'success' });
+          // 尝试刷新，如果失败则手动追加
+          try {
+            this.loadProperty(propId);
+          } catch(e) {
+            const newPhotos = results.filter(r => r && r.data).flatMap(r => {
+              const urls = r.data.photos || [];
+              return urls.map(url => ({ url: base + url }));
+            });
+            if (newPhotos.length) {
+              this.setData({ photos: [...this.data.photos, ...newPhotos] });
+            }
+          }
+        }).catch(() => { wx.hideLoading(); wx.showToast({ title: '上传失败', icon: 'none' }); });
+      }
+    });
+  },
+
+  async delPhoto(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const photo = this.data.photos[idx];
+    if (!photo) return;
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这张照片吗？',
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          if (photo.id) {
+            const r = await api.del('/upload/photos/' + photo.id);
+            if (r.code !== 0) { wx.showToast({ title: r.msg || '删除失败', icon: 'none' }); return; }
+          }
+          const photos = [...this.data.photos];
+          photos.splice(idx, 1);
+          this.setData({ photos });
+          wx.showToast({ title: '已删除', icon: 'success' });
+        } catch(e) {
+          wx.showToast({ title: '删除失败', icon: 'none' });
+        }
+      }
+    });
+  },
+
+  async del() {
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除此房源吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            const r = await api.del('/properties/' + this.data.p.id);
+            if (r.code === 0) { wx.showToast({ title: '已删除', icon: 'success' }); wx.navigateBack(); }
+          } catch(e) { wx.showToast({ title: '删除失败', icon: 'none' }); }
+        }
+      }
+    });
+  },
+
+  // 续签合同（延长一年）
+  async renewContract() {
+    const t = this.data.tenant;
+    if (!t || !t.id || !t.contract_end) {
+      wx.showToast({ title: '没有可续签的合同', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '续签合同',
+      content: `将 ${t.name} 的合同从 ${t.contract_end.slice(0,10)} 延长至 ${(parseInt(t.contract_end.slice(0,4))+1)}-${t.contract_end.slice(5,10)} ？`,
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          const oldEnd = new Date(t.contract_end);
+          const newEnd = new Date(oldEnd.getFullYear() + 1, oldEnd.getMonth(), oldEnd.getDate());
+          const r = await api.put('/tenants/' + t.id, { contract_end: newEnd.toISOString().slice(0, 10) });
+          if (r.code === 0) {
+            wx.showToast({ title: '续签成功', icon: 'success' });
+            this.loadProperty(this.data.p.id);
+          } else { wx.showToast({ title: r.msg || '续签失败', icon: 'none' }); }
+        } catch(e) { wx.showToast({ title: '续签失败', icon: 'none' }); }
+      }
+    });
+  },
+
+  // 查看该房源账单
+  goTenantBills() {
+    const app = getApp();
+    app.globalData.billSearch = this.data.p.name;
+    wx.navigateTo({ url: '/pages/bills/bills' });
+  },
+
+  // 🤖 AI生成房源描述
+  async generateAIDesc() {
+    const id = this.data.p.id;
+    if (!id) return;
+    this.setData({ aiLoading: true, aiResult: '' });
+    try {
+      const r = await api.post('/properties/' + id + '/ai-desc');
+      if (r.code === 0 && r.data) {
+        this.setData({ aiResult: r.data.description || r.data || '生成成功' });
+        wx.showToast({ title: 'AI描述已生成', icon: 'success' });
+      } else {
+        wx.showToast({ title: r.msg || '生成失败', icon: 'none' });
+      }
+    } catch(e) {
+      wx.showToast({ title: '生成失败', icon: 'none' });
+    }
+    this.setData({ aiLoading: false });
+  },
+
+  // 📤 多平台分发
+  async distribute() {
+    const id = this.data.p.id;
+    if (!id) return;
+    this.setData({ distLoading: true });
+    try {
+      const r = await api.post('/properties/' + id + '/distribute');
+      if (r.code === 0 && r.data) {
+        const channels = r.data.channels || r.data;
+        const channelNames = Object.keys(channels).join('、');
+        wx.showToast({ title: '已分发至：' + channelNames, icon: 'success', duration: 3000 });
+        // 显示分发结果
+        let resultText = r.data.summary ? '📢 ' + r.data.summary + '\n\n' : '';
+        for (const [ch, text] of Object.entries(channels)) {
+          resultText += '■ ' + ch + '：\n' + (text.length > 80 ? text.slice(0, 80) + '...' : text) + '\n\n';
+        }
+        this.setData({ aiResult: resultText });
+      } else {
+        wx.showToast({ title: r.msg || '分发失败', icon: 'none' });
+      }
+    } catch(e) {
+      wx.showToast({ title: '分发失败', icon: 'none' });
+    }
+    this.setData({ distLoading: false });
+  },
+
+  // 📋 复制结果
+  copyResult() {
+    const text = this.data.aiResult;
+    if (!text) return;
+    wx.setClipboardData({ data: text, success: () => wx.showToast({ title: '已复制', icon: 'success' }) });
+  }
+});

@@ -1,0 +1,103 @@
+<scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+
+  <view class="page-hd">
+    <text class="page-title">🔧 报修管理</text>
+    <text class="page-desc">AI智能诊断、费用预估、服务商推荐</text>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-item {{filterStatus==='all'?'f-active':''}}" bindtap="filterBy" data-status="all">全部</view>
+    <view class="filter-item {{filterStatus==='diagnosed'?'f-active':''}}" bindtap="filterBy" data-status="diagnosed">待处理</view>
+    <view class="filter-item {{filterStatus==='completed'?'f-active':''}}" bindtap="filterBy" data-status="completed">已完成</view>
+  </view>
+
+  <!-- 新增按钮 -->
+  <button class="btn-add-full" bindtap="openAdd">
+    <text>+ AI智能报修</text>
+    <text class="btn-sub">描述问题，AI自动诊断分类和估价</text>
+  </button>
+
+  <!-- 报修列表 -->
+  <view class="list">
+    <view class="card" wx:for="{{filteredList}}" wx:key="id" catchtap="viewDetail" data-id="{{item.id}}">
+      <view class="card-top">
+        <text class="card-name">{{item.issue_description}}</text>
+        <text class="card-status {{item.status==='completed'?'tag-green':item.status==='diagnosed'?'tag-orange':'tag-blue'}}">{{item._statusText}}</text>
+      </view>
+      <view class="card-info">🏠 {{item.property_name}}</view>
+      <view class="card-tags">
+        <text class="tag tag-orange" wx:if="{{item.repair_category}}">{{item.repair_category}}</text>
+        <text class="tag {{item._urgencyClass}}" wx:if="{{item.ai_urgency}}">{{item.ai_urgency}}</text>
+        <text class="tag tag-blue" wx:if="{{item.ai_price_min}}">¥{{item.ai_price_min}}-{{item.ai_price_max}}</text>
+      </view>
+      <view class="card-bottom">
+        <text class="card-time">{{item._time}}</text>
+        <view wx:if="{{item.status!=='completed'}}">
+          <button class="btn-tiny btn-green" catchtap="doComplete" data-id="{{item.id}}">标记完成</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="empty" wx:if="{{filteredList.length===0}}"><text>暂无报修记录</text></view>
+
+  <!-- ===== 提交报修弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showAdd}}" bindtap="closeAdd"></view>
+  <view class="modal" wx:if="{{showAdd}}">
+    <view class="modal-hd">
+      <text class="modal-title">📋 智能报修</text>
+      <text class="modal-close" bindtap="closeAdd">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="form-label">选择房源</text>
+      <picker class="form-picker" mode="selector" range="{{properties}}" range-key="{{'name'}}" bindchange="onPropChange">
+        <view class="picker-box">{{formPropName || '请选择房源'}}</view>
+      </picker>
+
+      <text class="form-label">问题描述</text>
+      <textarea class="form-input area" placeholder="请描述维修问题，例如：厨房水龙头漏水，需要更换" value="{{formDesc}}" bindinput="onDescInput"></textarea>
+
+      <text class="form-label">报修人（选填）</text>
+      <input class="form-input" placeholder="租客姓名" value="{{formTenantName}}" bindinput="onTenantInput"/>
+
+      <text class="form-label">联系电话（选填）</text>
+      <input class="form-input" placeholder="手机号" type="number" value="{{formTenantPhone}}" bindinput="onPhoneInput"/>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeAdd">取消</button>
+      <button class="btn-primary" bindtap="submitRepair" loading="{{isSubmitting}}">{{isSubmitting?'AI分析中...':'提交并AI诊断'}}</button>
+    </view>
+  </view>
+
+  <!-- ===== AI诊断结果弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showDiagnosis}}" bindtap="closeDiagnosis"></view>
+  <view class="modal diag-modal" wx:if="{{showDiagnosis}}">
+    <view class="modal-hd">
+      <text class="modal-title">🤖 AI诊断报告</text>
+      <text class="modal-close" bindtap="closeDiagnosis">✕</text>
+    </view>
+    <view class="modal-bd" wx:if="{{diagnosis}}">
+      <view class="diag-row"><text class="diag-label">问题分类</text><text class="diag-val tag tag-orange">{{diagnosis.category}}</text></view>
+      <view class="diag-row"><text class="diag-label">紧急程度</text><text class="diag-val tag {{diagnosis.urgency==='紧急'?'urgency-danger':diagnosis.urgency==='加急'?'urgency-warn':'urgency-normal'}}">{{diagnosis.urgency}}</text></view>
+      <view class="diag-row"><text class="diag-label">预估费用</text><text class="diag-val diag-price">¥{{diagCostMin}} ~ ¥{{diagCostMax}}</text></view>
+
+      <text class="diag-section">🔍 可能原因</text>
+      <view class="cause-item" wx:for="{{diagnosis.probable_causes}}" wx:key="index" wx:for-item="c">
+        <text class="cause-name">{{c.issue || c.name}}</text>
+        <text class="cause-prob" wx:if="{{c.probability}}">可能性 {{c.probability}}%</text>
+        <text class="cause-cost" wx:if="{{c.cost_min || c.cost_max}}">维修约 ¥{{c.cost_min||0}}-{{c.cost_max||0}}</text>
+      </view>
+
+      <text class="diag-section" wx:if="{{diagnosis.pitfall_warning}}">⚠️ 避坑提醒</text>
+      <text class="diag-pitfall" wx:if="{{diagnosis.pitfall_warning}}">{{diagnosis.pitfall_warning}}</text>
+
+      <!-- 完成报修时记录实际费用 -->
+      <view class="diag-complete" wx:if="{{repairId}}">
+        <text class="diag-section">📝 维修完成记录（选填）</text>
+        <input class="form-input" placeholder="维修师傅/公司" value="{{providerName}}" bindinput="onProviderName"/>
+        <input class="form-input" placeholder="实际费用（元）" type="number" value="{{providerCost}}" bindinput="onProviderCost"/>
+        <button class="btn-primary" bindtap="saveActual">✅ 确认完成并保存</button>
+      </view>
+    </view>
+  </view>
+</scroll-view>

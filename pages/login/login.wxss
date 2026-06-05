@@ -1,0 +1,56 @@
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2E6BFF 0%, #6C5CE7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 30rpx;
+}
+.card {
+  background: #fff;
+  border-radius: 30rpx;
+  padding: 60rpx 50rpx;
+  width: 100%;
+  max-width: 600rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0,0,0,0.15);
+}
+.logo { text-align: center; margin-bottom: 50rpx; }
+.logo-icon { font-size: 60rpx; }
+.logo-title { display: block; font-size: 40rpx; font-weight: 700; color: #2E6BFF; margin-top: 10rpx; }
+.logo-desc { display: block; font-size: 26rpx; color: #6B7A8D; margin-top: 8rpx; }
+
+.tabs {
+  display: flex; margin-bottom: 40rpx; background: #F0F2F5; border-radius: 16rpx; padding: 6rpx;
+}
+.tab {
+  flex: 1; padding: 20rpx; text-align: center; border-radius: 12rpx; font-size: 28rpx; color: #6B7A8D;
+}
+.tab.on { background: #fff; color: #2E6BFF; font-weight: 600; }
+
+.fld { margin-bottom: 28rpx; }
+.label { display: block; font-size: 26rpx; font-weight: 500; color: #1E2A3B; margin-bottom: 10rpx; }
+.inp {
+  width: 100%; padding: 26rpx 28rpx; border: 2rpx solid #D0D5DD; border-radius: 16rpx;
+  font-size: 30rpx; background: #F8FAFB; color: #1E2A3B; caret-color: #2E6BFF;
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+}
+.inp:focus { border-color: #2E6BFF; background: #F0F5FF; }
+.ph { color: #B0B8C5; font-size: 26rpx; }
+/* 手机端输入文字可见 */
+input { color: #1E2A3B !important; -webkit-text-fill-color: #1E2A3B; }
+/* 密码输入点可见 */
+input[type="password"] { -webkit-text-security: disc; }
+
+.btn {
+  width: 100%; padding: 24rpx; background: #2E6BFF; color: #fff; border: none; border-radius: 16rpx;
+  font-size: 32rpx; font-weight: 600; margin-top: 10rpx; line-height: 1.4;
+}
+.btn:active { background: #1A56E8; }
+.btn[loading] { opacity: 0.7; }
+
+.msg { display: block; font-size: 24rpx; margin-top: 20rpx; text-align: center; min-height: 40rpx; }
+.msg.err { color: #FF6B6B; }
+.msg.ok { color: #00C48C; }
+.fld-actions { display: flex; justify-content: flex-end; margin-bottom: 20rpx; }
+.link { font-size: 24rpx; color: #2E6BFF; padding: 8rpx 0; display: inline-block; }
+.link:active { opacity: .7; }
