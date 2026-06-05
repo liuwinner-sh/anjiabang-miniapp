@@ -123,8 +123,22 @@
     </view>
   </view>
 
-  <!-- 智能配盘 -->
-  <view class="section" wx:if="{{smartMatch.length>0}}">
+  <!-- 智能配盘 - 暂隐藏，待真实客户数据到位后启用 -->
+  <!-- <view class="section" wx:if="{{smartMatch.length>0}}">
+    <view class="section-hd">
+      <text class="section-title">🤖 智能配盘</text>
+      <text class="section-more" bindtap="goCustomers">AI匹配 ›</text>
+    </view>
+    <view class="match-card" wx:for="{{smartMatch}}" wx:key="customer_id">
+      <view class="match-hd">
+        <text class="match-customer">👤 {{item.customer_name}}</text>
+        <text class="match-score">匹配 {{item.match_score}}%</text>
+      </view>
+      <text class="match-prop">🏠 {{item.property_name}}</text>
+      <text class="match-spec">{{item.property_spec}} · ¥{{item.property_price}}/月</text>
+      <text class="match-reason">💡 {{item.match_reason}}</text>
+    </view>
+  </view> -->
     <view class="section-hd">
       <text class="section-title">🤖 智能配盘</text>
       <text class="section-more" bindtap="goCustomers">AI匹配 ›</text>
