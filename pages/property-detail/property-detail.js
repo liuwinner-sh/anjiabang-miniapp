@@ -239,14 +239,10 @@ Page({
     });
   },
 
-  // 👆 点击图片设为封面
+  // ⭐ 设为封面（通过按钮点击，直接取data-photoid）
   async setCover(e) {
-    const idx = e.currentTarget.dataset.idx;
-    const photo = this.data.photos[idx];
-    if (!photo) return;
-    // 如果没有id，说明是刚上传的本地照片
-    const photoid = photo.id || e.currentTarget.dataset.photoid;
-    if (!photoid) { wx.showToast({ title: '请等待照片上传完成', icon: 'none' }); return; }
+    const photoid = e.currentTarget.dataset.photoid;
+    if (!photoid) { wx.showToast({ title: '照片无ID，请刷新重试', icon: 'none' }); return; }
     wx.showLoading({ title: '设为封面...' });
     try {
       const r = await api.put('/upload/photos/' + photoid, { is_primary: 1 });

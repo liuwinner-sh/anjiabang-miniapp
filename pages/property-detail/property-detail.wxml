@@ -41,10 +41,13 @@
     <view class="section-hd"><text class="section-title">📷 房源照片</text><text class="section-more" bindtap="uploadPhoto">+ 添加</text></view>
     <scroll-view class="photo-scroll" scroll-x>
       <view class="photo-item" wx:for="{{photos}}" wx:for-index="pidx" wx:key="id">
-        <image src="{{item.url || item}}" mode="aspectFill" class="photo-img" catchtap="setCover" data-idx="{{pidx}}"/>
+        <image src="{{item.url || item}}" mode="aspectFill" class="photo-img"/>
         <view class="photo-order" wx:if="{{pidx===0}}"><text class="cover-badge">封面</text></view>
-        <text class="photo-del" catchtap="delPhoto" data-idx="{{pidx}}" data-photoid="{{item.id}}">×</text>
-        <text class="photo-replace" catchtap="replacePhoto" data-idx="{{pidx}}" data-photoid="{{item.id}}">↻</text>
+        <view class="photo-ctl">
+          <text class="ctl-btn ctl-del" catchtap="delPhoto" data-idx="{{pidx}}" data-photoid="{{item.id}}">× 删</text>
+          <text class="ctl-btn ctl-cover" catchtap="setCover" data-idx="{{pidx}}" data-photoid="{{item.id}}">⭐ 封面</text>
+          <text class="ctl-btn ctl-replace" catchtap="replacePhoto" data-idx="{{pidx}}" data-photoid="{{item.id}}">↻ 换</text>
+        </view>
       </view>
       <view class="photo-add" bindtap="uploadPhoto"><text>+</text></view>
     </scroll-view>

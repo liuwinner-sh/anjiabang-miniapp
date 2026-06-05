@@ -5,12 +5,15 @@
 .section-more { font-size: 24rpx; color: #2E6BFF; }
 
 .photo-scroll { display: flex; gap: 16rpx; white-space: nowrap; overflow-x: auto; padding-bottom: 10rpx; }
-.photo-item { display: inline-block; width: 200rpx; height: 200rpx; position: relative; margin-right: 16rpx; }
-.photo-img { width: 100%; height: 100%; border-radius: 12rpx; }
-.photo-del { position: absolute; top: 6rpx; right: 6rpx; width: 40rpx; height: 40rpx; background: rgba(198,40,40,0.85); color: #fff; border-radius: 50%; text-align: center; line-height: 40rpx; font-size: 28rpx; font-weight: 700; z-index: 10; }
-.photo-replace { position: absolute; top: 6rpx; left: 6rpx; width: 40rpx; height: 40rpx; background: rgba(46,107,255,0.85); color: #fff; border-radius: 50%; text-align: center; line-height: 40rpx; font-size: 24rpx; z-index: 10; }
-.photo-order { position: absolute; bottom: 6rpx; left: 6rpx; z-index: 10; }
+.photo-item { display: inline-block; width: 200rpx; margin-right: 20rpx; vertical-align: top; }
+.photo-img { width: 200rpx; height: 200rpx; border-radius: 12rpx; display: block; }
+.photo-order { margin-top: 6rpx; }
 .cover-badge { font-size: 18rpx; background: #2E6BFF; color: #fff; padding: 2rpx 10rpx; border-radius: 8rpx; }
+.photo-ctl { display: flex; gap: 6rpx; margin-top: 6rpx; }
+.ctl-btn { flex: 1; padding: 6rpx 0; text-align: center; font-size: 20rpx; border-radius: 6rpx; font-weight: 600; }
+.ctl-del { background: #FCEBEB; color: #C62828; }
+.ctl-cover { background: #E8F0FF; color: #2E6BFF; }
+.ctl-replace { background: #F3E8FF; color: #7C3AED; }
 .photo-add { display: inline-flex; width: 200rpx; height: 200rpx; border: 4rpx dashed #E4E9F0; border-radius: 12rpx; align-items: center; justify-content: center; font-size: 60rpx; color: #6B7A8D; }
 .photo-empty { text-align: center; padding: 40rpx; color: #6B7A8D; font-size: 24rpx; }
 
