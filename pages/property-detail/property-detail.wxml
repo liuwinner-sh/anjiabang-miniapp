@@ -43,8 +43,8 @@
       <view class="photo-item" wx:for="{{photos}}" wx:key="id" bindtap="onPhotoTap" data-idx="{{idx}}" data-photoid="{{item.id}}" data-url="{{item.url || item}}">
         <image src="{{item.url || item}}" mode="aspectFill" class="photo-img"/>
         <view class="photo-actions">
-          <text class="photo-del" bindtap="delPhoto" data-idx="{{idx}}">×</text>
-          <text class="photo-replace" bindtap="replacePhoto" data-idx="{{idx}}" data-photoid="{{item.id}}">↻</text>
+          <text class="photo-del" catchtap="delPhoto" data-idx="{{idx}}">×</text>
+          <text class="photo-replace" catchtap="replacePhoto" data-idx="{{idx}}" data-photoid="{{item.id}}">↻</text>
         </view>
         <view class="photo-order" wx:if="{{idx===0}}"><text class="cover-badge">封面</text></view>
       </view>
