@@ -38,12 +38,16 @@ Page({
         api.get('/bills?page=1&pageSize=2000')
       ]);
 
-      // 智能配盘（独立捕获错误，不影响主流程）
+      // 智能配盘（有真实客户才显示）
       api.get('/smart/match').then(sr => {
         if (sr.success && sr.data && sr.data.length > 0) {
           this.setData({ smartMatch: sr.data.slice(0, 3) });
+        } else {
+          this.setData({ smartMatch: [] });
         }
-      }).catch(() => {});
+      }).catch(() => {
+        this.setData({ smartMatch: [] });
+      });
 
       const props = propsRes.data?.list || propsRes.data || [];
       const tenants = tenantsRes.data?.list || [];
