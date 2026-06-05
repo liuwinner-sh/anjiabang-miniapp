@@ -9,7 +9,7 @@ function request(path, method = 'GET', data = {}) {
       url,
       method,
       data,
-      timeout: 15000, // 15秒超时
+      timeout: 30000, // 30秒超时
       header: {
         'content-type': 'application/json',
         ...(token ? { 'Authorization': 'Bearer ' + token } : {})

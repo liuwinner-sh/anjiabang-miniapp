@@ -2,7 +2,7 @@ App({
   globalData: {
     token: '',
     userInfo: null,
-    apiBase: 'https://adequate-drums-wright-effective.trycloudflare.com/api/fang'
+    apiBase: 'https://defeat-well-dedicated-scientists.trycloudflare.com/api/fang'
   },
   onLaunch() {
     const token = wx.getStorageSync('token');
