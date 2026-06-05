@@ -188,6 +188,7 @@ Page({
   },
 
   showReport() { wx.navigateTo({ url: '/pages/report/report' }); },
+  goTenants() { wx.navigateTo({ url: '/pages/tenants/tenants' }); },
   goUtilities() { wx.navigateTo({ url: '/pages/utilities/utilities' }); },
   goRepairs() { wx.navigateTo({ url: '/pages/repairs/repairs' }); },
   goFiling() { wx.navigateTo({ url: '/pages/filing/filing' }); },

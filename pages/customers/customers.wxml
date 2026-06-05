@@ -1,7 +1,13 @@
 <scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
   <view class="page-hd">
-    <text class="page-title">👤 客户管理</text>
-    <text class="page-desc">AI智能标签、聊天总结、自动回复</text>
+    <text class="page-title">👤 意向客户</text>
+    <text class="page-desc">记录咨询/看房的潜在客户，AI自动匹配房源跟进</text>
+  </view>
+
+  <!-- 快捷导航 -->
+  <view class="nav-hint">
+    <text class="nh-icon">💡</text>
+    <text class="nh-text">已有租客请到「房源详情→租客管理」管理合同和租金</text>
   </view>
 
   <!-- 筛选 -->

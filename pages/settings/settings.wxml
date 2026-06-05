@@ -35,11 +35,12 @@
   <!-- 菜单 -->
   <view class="menu">
     <view class="menu-item" bindtap="changePwd"><text class="mi-icon">🔑</text><text class="mi-txt">修改密码</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goTenants"><text class="mi-icon">👥</text><text class="mi-txt">租客管理</text><text class="mi-arrow">›</text></view>
     <view class="menu-item" bindtap="showReport"><text class="mi-icon">📊</text><text class="mi-txt">收支报表</text><text class="mi-arrow">›</text></view>
     <view class="menu-item" bindtap="goUtilities"><text class="mi-icon">🔌</text><text class="mi-txt">水电煤</text><text class="mi-arrow">›</text></view>
     <view class="menu-item" bindtap="goRepairs"><text class="mi-icon">🔧</text><text class="mi-txt">维修报修</text><text class="mi-arrow">›</text></view>
     <view class="menu-item" bindtap="goFiling"><text class="mi-icon">📋</text><text class="mi-txt">合同备案</text><text class="mi-arrow">›</text></view>
-    <view class="menu-item" bindtap="goCustomers"><text class="mi-icon">👤</text><text class="mi-txt">客户管理</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goCustomers"><text class="mi-icon">👤</text><text class="mi-txt">意向客户</text><text class="mi-arrow">›</text></view>
     <view class="menu-item" bindtap="goSubscription"><text class="mi-icon">💳</text><text class="mi-txt">套餐订阅</text><text class="mi-arrow">›</text></view>
   </view>
 
