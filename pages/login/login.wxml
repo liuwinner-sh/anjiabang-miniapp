@@ -44,6 +44,7 @@
       </view>
       <button class="btn" bindtap="doReset" loading="{{resetLoading}}">{{resetLoading?'重置中...':'重置密码'}}</button>
       <text class="msg {{resetMsgType}}">{{resetMsg}}</text>
+      <text class="tab-note">⚠️ 正式版将增加短信验证，确保账户安全</text>
       <text class="link" catchtap="switchTab" data-tab="login">← 返回登录</text>
     </view>
 

@@ -13,6 +13,7 @@ Page({
     formPayment: '月付', formStart: '', formEnd: '', formDeposit: '',
     // AI生成弹窗
     showAI: false, aiResult: '', aiLoading: false,
+    aiPropIdx: 0, aiTenantIdx: 0,
     paymentTypes: ['月付', '季付', '半年付', '年付']
   },
 
@@ -106,29 +107,36 @@ Page({
     }
     this.setData({ showAI: true, aiResult: '', aiLoading: false });
   },
-  closeAI() { this.setData({ showAI: false }); },
+  closeAI() { this.setData({ showAI: false, aiResult: '' }); },
+  onAIProp(e) { this.setData({ aiPropIdx: parseInt(e.detail.value) }); },
+  onAITenant(e) { this.setData({ aiTenantIdx: parseInt(e.detail.value) }); },
+  copyAIResult() {
+    const text = this.data.aiResult;
+    if (!text) return;
+    wx.setClipboardData({ data: text, success: () => wx.showToast({ title: '已复制到剪贴板', icon: 'success' }) });
+  },
   async doAiGenerate() {
     const user = app.globalData.userInfo;
-    const prop = this.data.properties[0]; // 默认第一个房源
-    const t = this.data.tenants[0];
-    if (!prop || !t) { wx.showToast({ title: '请先添加房源和租客', icon: 'none' }); return; }
+    const prop = this.data.properties[this.data.aiPropIdx] || this.data.properties[0];
+    const tenant = this.data.tenants[this.data.aiTenantIdx] || this.data.tenants[0];
+    if (!prop || !tenant) { wx.showToast({ title: '请先添加房源和租客', icon: 'none' }); return; }
     this.setData({ aiLoading: true });
     try {
       const res = await api.post('/ai/generate-contract', {
         landlord_name: user?.nickname || user?.phone || '房东',
         landlord_phone: user?.phone || '',
-        tenant_name: t.name || '租客',
-        tenant_phone: t.phone || '',
+        tenant_name: tenant.name || '租客',
+        tenant_phone: tenant.phone || '',
         property_address: prop.name || prop.address || '',
         city: prop.city || '',
         district: prop.district || '',
         community: prop.community || '',
         room: prop.room, hall: prop.hall, area: prop.area,
-        rent_amount: t.rent_amount || prop.rent || 0,
-        payment_type: t.payment_type || '月付',
-        deposit: t.deposit || 0,
-        contract_start: t.contract_start || '',
-        contract_end: t.contract_end || ''
+        rent_amount: tenant.rent_amount || prop.rent || 0,
+        payment_type: tenant.payment_type || '月付',
+        deposit: tenant.deposit || 0,
+        contract_start: tenant.contract_start || '',
+        contract_end: tenant.contract_end || ''
       });
       if (res.code === 0) {
         this.setData({ aiResult: res.data?.contract || res.data || '生成成功', aiLoading: false });

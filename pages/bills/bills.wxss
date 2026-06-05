@@ -42,6 +42,10 @@
 .form-static { display: block; font-size: 26rpx; color: #1E2A3B; padding: 8rpx 0; }
 .empty-sub { font-size: 22rpx; color: #9CA3AF; margin-top: 8rpx; }
 
+/* 加载更多 */
+.load-more { text-align: center; padding: 24rpx; font-size: 24rpx; color: #2E6BFF; }
+.load-more:active { opacity: 0.5; }
+
 /* 空状态 */
 .empty-state { text-align: center; padding: 80rpx 0; }
 .empty-icon { font-size: 80rpx; display: block; }

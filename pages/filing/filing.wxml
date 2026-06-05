@@ -93,13 +93,24 @@
       <text class="modal-close" bindtap="closeAI">✕</text>
     </view>
     <view class="modal-bd">
-      <text class="form-tip">基于已有房源和租客信息，AI自动生成规范租赁合同。将使用第一个房源和租客的信息。</text>
+      <text class="form-label">选择房源</text>
+      <picker mode="selector" range="{{properties}}" range-key="name" value="{{aiPropIdx}}" bindchange="onAIProp">
+        <view class="picker-box">{{properties[aiPropIdx]?.name || '请选择'}}</view>
+      </picker>
+      <text class="form-label">选择租客</text>
+      <picker mode="selector" range="{{tenants}}" range-key="name" value="{{aiTenantIdx}}" bindchange="onAITenant">
+        <view class="picker-box">{{tenants[aiTenantIdx]?.name || '请选择'}}</view>
+      </picker>
       <button class="btn-primary" bindtap="doAiGenerate" loading="{{aiLoading}}" wx:if="{{!aiResult}}">
         {{aiLoading ? 'AI生成中...' : '开始生成合同'}}
       </button>
       <scroll-view class="ai-result" scroll-y wx:if="{{aiResult}}">
         <text>{{aiResult}}</text>
       </scroll-view>
+      <view class="ai-actions" wx:if="{{aiResult}}">
+        <button class="btn-outline" bindtap="copyAIResult">📋 复制</button>
+        <button class="btn-primary" bindtap="closeAI">完成</button>
+      </view>
     </view>
   </view>
 </scroll-view>

@@ -63,6 +63,14 @@
     <text class="empty-sub">点击"+ 记一笔"添加租金记录</text>
   </view>
 
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore && list.length>0}}" bindtap="loadMore">
+    <text>↓ 加载更多（共{{totalBills}}条）</text>
+  </view>
+  <view class="load-more" wx:elif="{{!hasMore && list.length>0}}">
+    <text>已展示全部 {{totalBills}} 条</text>
+  </view>
+
   <!-- ===== 记一笔弹窗 ===== -->
   <view class="mask" wx:if="{{showAdd}}" bindtap="closeAdd"></view>
   <view class="modal" wx:if="{{showAdd}}">

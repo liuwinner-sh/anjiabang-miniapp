@@ -9,6 +9,11 @@ Page({
     accounts: [],
     latestReadings: [],
     readingHistory: [],
+    showHistory: false,
+    // 解绑确认
+    showUnbind: false,
+    unbindAccountId: null,
+    unbindAccountInfo: null,
     // 绑定弹窗
     showBind: false,
     bindType: 'electricity',
@@ -87,7 +92,7 @@ Page({
     try {
       const res = await api.post('/utility_account/bind', {
         property_id: prop.id,
-        user_id: app.globalData.userInfo?.id || 1,
+        user_id: app.globalData.userId || 1,
         utility_type: this.data.bindType,
         account_number: this.data.bindAccount,
         billing_cycle: 'monthly',
@@ -134,7 +139,7 @@ Page({
         property_id: prop.id,
         reading_value: parseFloat(this.data.meterReading),
         reading_date: dateStr,
-        submitted_by: app.globalData.userInfo?.id || 1
+        submitted_by: app.globalData.userId || 1
       });
       if (res.success) {
         wx.showToast({
@@ -160,14 +165,72 @@ Page({
     try {
       const res = await api.get('/meter/account/' + acid + '?limit=12');
       const data = res.data || [];
-      this.setData({ readingHistory: data });
-      if (data.length === 0) {
+      // 计算用量趋势：相邻两次读数差值
+      const trends = [];
+      for (let i = 1; i < data.length; i++) {
+        const prev = Number(data[i-1].reading_value) || 0;
+        const curr = Number(data[i].reading_value) || 0;
+        if (prev > 0 && curr > prev) {
+          trends.push({
+            date: data[i].reading_date || data[i].created_at?.slice(0,10) || '',
+            consumption: (curr - prev).toFixed(1),
+            reading: curr
+          });
+        }
+      }
+      this.setData({ readingHistory: data, showHistory: true });
+      // 显示用量趋势
+      if (trends.length > 0) {
+        const last3 = trends.slice(-3).reverse();
+        let trendMsg = '📊 最近用量趋势：\n';
+        last3.forEach(t => {
+          trendMsg += t.date + ' → 用量 ' + t.consumption + '\n';
+        });
+        if (trends.length >= 3) {
+          const avg = trends.slice(-3).reduce((s,t) => s + parseFloat(t.consumption), 0) / 3;
+          trendMsg += '月均用量：' + avg.toFixed(1);
+        }
+        wx.showToast({ title: trendMsg, icon: 'none', duration: 3000 });
+      } else if (data.length === 0) {
         wx.showToast({ title: '暂无历史记录', icon: 'none' });
       }
     } catch(e) { wx.showToast({ title: '加载失败', icon: 'none' }); }
   },
 
-  hideHistory() { this.setData({ readingHistory: [] }); },
+  hideHistory() { this.setData({ readingHistory: [], showHistory: false }); },
+
+  // ---- 解绑账户 ----
+  confirmUnbind(e) {
+    const acid = e.currentTarget.dataset.acid;
+    const account = this.data.accounts.find(a => a.id === acid);
+    if (!account) return;
+    this.setData({
+      showUnbind: true,
+      unbindAccountId: acid,
+      unbindAccountInfo: account
+    });
+  },
+  closeUnbind() { this.setData({ showUnbind: false }); },
+  async doUnbind() {
+    const acid = this.data.unbindAccountId;
+    if (!acid) return;
+    wx.showLoading({ title: '解绑中...' });
+    try {
+      const res = await api.del('/utility_account/' + acid);
+      if (res.success) {
+        wx.hideLoading();
+        wx.showToast({ title: '已解绑', icon: 'success' });
+        this.setData({ showUnbind: false });
+        this.selectProperty(this.data.curProperty);
+      } else {
+        wx.hideLoading();
+        wx.showToast({ title: res.error || '解绑失败', icon: 'none' });
+      }
+    } catch(e) {
+      wx.hideLoading();
+      wx.showToast({ title: '解绑失败', icon: 'none' });
+    }
+  },
 
   getTypeName(t) {
     const m = { electricity: '⚡ 电表', water: '💧 水表', gas: '🔥 燃气' };

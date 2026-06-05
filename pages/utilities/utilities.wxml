@@ -7,7 +7,7 @@
   <!-- 房源选择 -->
   <view class="section">
     <text class="sec-label">选择房源</text>
-    <picker mode="selector" range="{{properties}}" range-key="{{'name'}}" value="{{curPropIdx}}" bindchange="onPropChange">
+    <picker mode="selector" range="{{properties}}" range-key="name" value="{{curPropIdx}}" bindchange="onPropChange">
       <view class="picker-box">{{curProperty?curProperty.name:'请选择'}}</view>
     </picker>
   </view>
@@ -22,6 +22,7 @@
       <view class="card-top">
         <text class="ac-type">{{getTypeName(ac.utility_type)}}</text>
         <text class="ac-num">户号 {{ac.account_number || '-'}}</text>
+        <button class="btn-unbind" bindtap="confirmUnbind" data-acid="{{ac.id}}">解绑</button>
       </view>
       <view class="ac-reading" wx:if="{{latestReadings.length>0}}">
         <text class="ac-val" wx:for="{{latestReadings}}" wx:key="id" wx:for-item="mr" wx:if="{{mr.utility_account_id===ac.id}}">
@@ -33,7 +34,7 @@
       </view>
       <view class="card-actions">
         <button class="btn-tiny btn-blue" bindtap="openMeter" data-acid="{{ac.id}}">📷 录入读数</button>
-        <button class="btn-tiny btn-outline" bindtap="viewHistory" data-acid="{{ac.id}}">📊 历史</button>
+        <button class="btn-tiny btn-outline" bindtap="viewHistory" data-acid="{{ac.id}}">📊 历史趋势</button>
       </view>
     </view>
     <view class="empty-sm" wx:if="{{accounts.length===0}}">
@@ -43,17 +44,17 @@
   </view>
 
   <!-- 历史读数 -->
-  <view class="section" wx:if="{{readingHistory.length>0}}">
+  <view class="section" wx:if="{{showHistory && readingHistory.length>0}}">
     <view class="sec-hd">
       <text class="sec-label">📊 抄表历史</text>
       <button class="btn-tiny btn-outline" bindtap="hideHistory">收起</button>
     </view>
     <view class="hist-list">
-      <view class="hist-item" wx:for="{{readingHistory}}" wx:key="id">
-        <text class="hist-date">{{item.reading_date}}</text>
+      <view class="hist-item" wx:for="{{readingHistory}}" wx:for-index="idx" wx:key="id">
+        <text class="hist-date">{{item.reading_date || '-'}}</text>
         <text class="hist-val">读数 {{item.reading_value}}</text>
-        <text class="hist-usage" wx:if="{{item.consumption!==null}}">用量 {{item.consumption}}</text>
-        <text class="hist-first" wx:if="{{item.consumption===null}}">首次</text>
+        <text class="hist-usage" wx:if="{{idx>0 && item.consumption!==null && item.consumption!==undefined}}">📈 +{{item.consumption}}</text>
+        <text class="hist-first" wx:if="{{idx===0 || item.consumption===null}}">初始值</text>
       </view>
     </view>
   </view>
@@ -67,8 +68,8 @@
     </view>
     <view class="modal-bd">
       <text class="form-label">仪表类型</text>
-      <picker mode="selector" range="{{['electricity','water','gas']}}" range-key="{{''}}" bindchange="onBindType">
-        <view class="picker-box">{{bindType==='electricity'?'电表':bindType==='water'?'水表':'燃气表'}}</view>
+      <picker mode="selector" range="{{['electricity','water','gas']}}" bindchange="onBindType">
+        <view class="picker-box">{{bindType==='electricity'?'⚡ 电表':bindType==='water'?'💧 水表':'🔥 燃气表'}}</view>
       </picker>
       <text class="form-label">户号</text>
       <input class="form-input" placeholder="请输入户号/账号" value="{{bindAccount}}" bindinput="onBindAccount"/>
@@ -94,6 +95,23 @@
     <view class="modal-ft">
       <button class="btn-cancel" bindtap="closeMeter">取消</button>
       <button class="btn-primary" bindtap="submitMeter" loading="{{submittingMeter}}">{{submittingMeter?'录入中...':'提交读数'}}</button>
+    </view>
+  </view>
+
+  <!-- ===== 解绑确认弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showUnbind}}" bindtap="closeUnbind"></view>
+  <view class="modal" wx:if="{{showUnbind}}">
+    <view class="modal-hd">
+      <text class="modal-title">⚠️ 确认解绑</text>
+      <text class="modal-close" bindtap="closeUnbind">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text wx:if="{{unbindAccountInfo}}">确定要解绑 {{getTypeName(unbindAccountInfo.utility_type)}}（户号 {{unbindAccountInfo.account_number}}）吗？</text>
+      <text>解绑后历史数据仍保留。</text>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeUnbind">取消</button>
+      <button class="btn-danger" bindtap="doUnbind">确认解绑</button>
     </view>
   </view>
 </scroll-view>

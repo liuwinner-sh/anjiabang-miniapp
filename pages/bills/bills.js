@@ -4,11 +4,12 @@ const app = getApp();
 Page({
   data: {
     refreshing: false, keyword: '',
-    list: [], allBills: [],
+    list: [], 
+    page: 1, pageSize: 50, hasMore: false, totalBills: 0,
     totalIncome: 0, totalPaid: 0, totalPending: 0,
     totalIncomeStr: '0', totalPaidStr: '0', totalPendingStr: '0',
     showAdd: false,
-    showEdit: false,  // 编辑弹窗
+    showEdit: false,
     editItem: null, editAmount: '', editMonth: '', editStatus: '',
     addProperties: []
   },
@@ -18,80 +19,80 @@ Page({
       this._pendingSearch = app.globalData.billSearch;
       app.globalData.billSearch = '';
     }
-    // 如果有月份筛选
     if (app.globalData.billMonthFilter) {
       this._pendingMonthFilter = app.globalData.billMonthFilter;
       app.globalData.billMonthFilter = '';
     }
   },
 
-  onShow() { this.loadData(); },
-  onRefresh() { this.setData({ refreshing: true }); this.loadData().then(() => this.setData({ refreshing: false })); },
+  onShow() {
+    this.setData({ page: 1, list: [] });
+    this.loadPage(1);
+  },
+  onRefresh() {
+    this.setData({ refreshing: true, page: 1, list: [] });
+    this.loadPage(1).then(() => this.setData({ refreshing: false }));
+  },
 
-  async loadData() {
+  async loadPage(page) {
     try {
-      const res = await api.get('/bills?page=1&pageSize=2000');
+      let url = '/bills?page=' + page + '&pageSize=' + this.data.pageSize;
+      // Add month filter if pending
+      if (this._pendingMonthFilter) {
+        // Backend doesn't support month filter yet, so use post-load filtering
+      }
+      const res = await api.get(url);
       const raw = res.data?.list || [];
-      const allBills = raw.map(b => ({
+      const mapped = raw.map(b => ({
         ...b,
         amountNum: Number(b.amount) || 0,
         amountStr: '¥' + (Number(b.amount) || 0).toLocaleString(),
         monthDisplay: (b.bill_date || '').substring(0, 7) || '-'
       }));
 
-      let keyword = this.data.keyword;
-      if (this._pendingSearch) {
-        keyword = this._pendingSearch;
-        this._pendingSearch = '';
-      }
-      // 如果有月份筛选，叠加搜索
+      // Apply month filter if pending
+      let filtered = mapped;
       if (this._pendingMonthFilter) {
         const mf = this._pendingMonthFilter;
         this._pendingMonthFilter = '';
-        // 将月份筛选设为keyword（因为月份在monthDisplay里）
-        setTimeout(() => {
-          this.setData({ keyword: mf });
-          this.filterWithKw(allBills, mf);
-        }, 100);
+        filtered = mapped.filter(b => (b.monthDisplay || '').includes(mf));
       }
 
-      const filtered = keyword
-        ? allBills.filter(b => (b.property_name || '').includes(keyword) || (b.monthDisplay || '').includes(keyword))
-        : allBills;
+      // Apply keyword search
+      const kw = this.data.keyword;
+      if (kw) {
+        filtered = filtered.filter(b => 
+          (b.property_name || '').includes(kw) || (b.monthDisplay || '').includes(kw)
+        );
+      }
 
       const totalIncome = filtered.reduce((s, b) => s + b.amountNum, 0);
       const totalPaid = filtered.filter(b => b.status === 'paid').reduce((s, b) => s + b.amountNum, 0);
       const totalPending = filtered.filter(b => b.status === 'pending').reduce((s, b) => s + b.amountNum, 0);
 
+      const newList = page === 1 ? filtered : [...this.data.list, ...filtered];
+      const hasMore = res.data?.hasMore || filtered.length >= this.data.pageSize;
+
       this.setData({
-        allBills, list: filtered,
+        list: newList, page,
+        hasMore, totalBills: res.data?.total || 0,
         totalIncome, totalPaid, totalPending,
         totalIncomeStr: '¥' + totalIncome.toLocaleString(),
         totalPaidStr: '¥' + totalPaid.toLocaleString(),
-        totalPendingStr: '¥' + totalPending.toLocaleString(),
-        keyword
+        totalPendingStr: '¥' + totalPending.toLocaleString()
       });
     } catch (e) { console.error(e); }
   },
 
-  filterWithKw(allBills, kw) {
-    this.setData({
-      list: allBills.filter(b =>
-        !kw || (b.property_name || '').includes(kw) || (b.monthDisplay || '').includes(kw)
-      ),
-      keyword: kw
-    });
+  onSearch(e) {
+    const kw = e.detail.value;
+    this.setData({ keyword: kw, page: 1, list: [] });
+    this.loadPage(1);
   },
 
-  onSearch(e) { this.setData({ keyword: e.detail.value }); this.filter(); },
-
-  filter() {
-    const kw = this.data.keyword;
-    this.setData({
-      list: this.data.allBills.filter(b =>
-        !kw || (b.property_name || '').includes(kw) || (b.monthDisplay || '').includes(kw)
-      )
-    });
+  loadMore() {
+    if (!this.data.hasMore) return;
+    this.loadPage(this.data.page + 1);
   },
 
   // ======== 记一笔 ========
@@ -107,10 +108,8 @@ Page({
     try {
       const pRes = await api.get('/properties/my?page=1&pageSize=100');
       const props = pRes.data?.list || [];
-      // 同时加载租客信息以获取合同租金
       const tRes = await api.get('/tenants?page=1&pageSize=100');
       const tenants = tRes.data?.list || [];
-      // 为每个房源标记当前租客和租金
       const enriched = props.map(p => {
         const tenant = tenants.find(t => t.property_id === p.id);
         return { ...p, tenantName: tenant ? tenant.name : '', rentAmount: tenant ? (tenant.rent_amount || p.rent) : p.rent };
@@ -132,10 +131,8 @@ Page({
     if (prop) {
       const defaultRent = prop.rentAmount || prop.rent || 0;
       this.setData({
-        addPropId: prop.id,
-        addPropName: prop.name,
-        addAmount: String(defaultRent),
-        addMonth: this.nowMonth(),
+        addPropId: prop.id, addPropName: prop.name,
+        addAmount: String(defaultRent), addMonth: this.nowMonth(),
         addTenant: prop.tenantName || ''
       });
     }
@@ -161,8 +158,8 @@ Page({
       if (res.code === 0 || res.success) {
         wx.hideLoading();
         wx.showToast({ title: '添加成功', icon: 'success' });
-        this.setData({ showAdd: false });
-        this.loadData();
+        this.setData({ showAdd: false, page: 1, list: [] });
+        this.loadPage(1);
       } else {
         wx.hideLoading();
         wx.showToast({ title: res.msg || '添加失败', icon: 'none' });
@@ -179,8 +176,7 @@ Page({
     const item = this.data.list[idx];
     if (!item) return;
     this.setData({
-      showEdit: true,
-      editItem: item,
+      showEdit: true, editItem: item,
       editAmount: String(item.amountNum),
       editMonth: (item.bill_date || '').substring(0, 7) || '',
       editStatus: item.status
@@ -211,8 +207,8 @@ Page({
       if (res.code === 0) {
         wx.hideLoading();
         wx.showToast({ title: '编辑成功', icon: 'success' });
-        this.setData({ showEdit: false });
-        this.loadData();
+        this.setData({ showEdit: false, page: 1, list: [] });
+        this.loadPage(1);
       } else {
         wx.hideLoading();
         wx.showToast({ title: res.msg || '编辑失败', icon: 'none' });
@@ -226,7 +222,7 @@ Page({
   async markPaid(e) {
     try {
       const res = await api.put('/bills/' + e.currentTarget.dataset.id, { status: 'paid' });
-      if (res.code === 0) { wx.showToast({ title: '已标记收款', icon: 'success' }); this.loadData(); }
+      if (res.code === 0) { wx.showToast({ title: '已标记收款', icon: 'success' }); this.loadPage(1); }
     } catch (e) { wx.showToast({ title: '操作失败', icon: 'none' }); }
   },
 
@@ -241,7 +237,7 @@ Page({
         if (r.confirm) {
           try {
             const res = await api.del('/bills/' + item.id);
-            if (res.code === 0) { wx.showToast({ title: '已删除', icon: 'success' }); this.loadData(); }
+            if (res.code === 0) { wx.showToast({ title: '已删除', icon: 'success' }); this.loadPage(1); }
             else { wx.showToast({ title: res.msg || '删除失败', icon: 'none' }); }
           } catch (e) { wx.showToast({ title: '删除失败', icon: 'none' }); }
         }
