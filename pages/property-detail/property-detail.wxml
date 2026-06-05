@@ -23,6 +23,19 @@
     </view>
   </view>
 
+  <!-- 房源描述/AI生成 -->
+  <view class="card" wx:if="{{p.description || p.ai_tags}}">
+    <view class="section-hd"><text class="section-title">📝 房源描述</text></view>
+    <text class="desc-text" wx:if="{{p.description}}">{{p.description}}</text>
+    <view class="tag-row" wx:if="{{p.ai_tags}}">
+      <text class="tag" wx:for="{{p.ai_tags.split(',')}}" wx:for-item="tag" wx:key="*this">#{{tag}}</text>
+    </view>
+    <view class="desc-actions" wx:if="{{p.id}}">
+      <button class="btn-sm" bindtap="generateAIDesc">✨ AI重新生成</button>
+      <button class="btn-sm outline" bindtap="copyDesc">📋 复制描述</button>
+    </view>
+  </view>
+
   <!-- 照片 -->
   <view class="card" wx:if="{{p.id}}">
     <view class="section-hd"><text class="section-title">📷 房源照片</text><text class="section-more" bindtap="uploadPhoto">+ 添加</text></view>

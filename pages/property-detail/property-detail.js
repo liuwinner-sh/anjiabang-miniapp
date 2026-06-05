@@ -224,7 +224,9 @@ Page({
       const r = await api.post('/properties/' + id + '/ai-desc');
       if (r.code === 0 && r.data) {
         this.setData({ aiResult: r.data.description || r.data || '生成成功' });
-        wx.showToast({ title: 'AI描述已生成', icon: 'success' });
+        wx.showToast({ title: 'AI描述已生成, 已自动保存', icon: 'success', duration: 2000 });
+        // 重新加载房源数据，显示保存的描述
+        this.loadProperty(id);
       } else {
         wx.showToast({ title: r.msg || '生成失败', icon: 'none' });
       }
@@ -244,13 +246,18 @@ Page({
       if (r.code === 0 && r.data) {
         const channels = r.data.channels || r.data;
         const channelNames = Object.keys(channels).join('、');
-        wx.showToast({ title: '已分发至：' + channelNames, icon: 'success', duration: 3000 });
-        // 显示分发结果
+        // 显示完整分发结果
         let resultText = r.data.summary ? '📢 ' + r.data.summary + '\n\n' : '';
         for (const [ch, text] of Object.entries(channels)) {
-          resultText += '■ ' + ch + '：\n' + (text.length > 80 ? text.slice(0, 80) + '...' : text) + '\n\n';
+          resultText += '━━━ ' + ch + ' ━━━\n';
+          resultText += text + '\n\n';
         }
-        this.setData({ aiResult: resultText });
+        this.setData({ aiResult: resultText, aiResultTitle: '📤 多平台分发文案（可复制）' });
+        wx.showModal({
+          title: '分发完成',
+          content: '已生成' + channelNames + '等' + Object.keys(channels).length + '个渠道的推广文案，可复制到对应平台发布',
+          showCancel: false
+        });
       } else {
         wx.showToast({ title: r.msg || '分发失败', icon: 'none' });
       }
@@ -265,6 +272,17 @@ Page({
     const text = this.data.aiResult;
     if (!text) return;
     wx.setClipboardData({ data: text, success: () => wx.showToast({ title: '已复制', icon: 'success' }) });
+  },
+
+  // 📋 复制房源描述
+  copyDesc() {
+    const p = this.data.p;
+    let text = p.title + '\n';
+    if (p.room && p.hall) text += p.room + '室' + p.hall + '厅 ' + p.area + '平米\n';
+    if (p.price) text += '月租 ¥' + p.price + '\n\n';
+    if (p.description) text += p.description;
+    if (p.ai_tags) text += '\n\n标签：' + p.ai_tags;
+    wx.setClipboardData({ data: text, success: () => wx.showToast({ title: '房源信息已复制', icon: 'success' }) });
   },
 
   // 💰 AI智能定价

@@ -41,6 +41,17 @@
 .ai-result-text { display: block; font-size: 24rpx; color: #1E2A3B; line-height: 1.6; white-space: pre-wrap; }
 .btn-copy { margin-top: 12rpx; padding: 12rpx 24rpx; background: #E8F0FF; color: #2E6BFF; border: none; border-radius: 8rpx; font-size: 22rpx; }
 
+/* 房源描述区 */
+.desc-text { display: block; font-size: 26rpx; color: #1E2A3B; line-height: 1.8; margin-bottom: 16rpx; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 8rpx; margin-bottom: 16rpx; }
+.tag { font-size: 22rpx; padding: 6rpx 16rpx; background: #E8F0FF; color: #2E6BFF; border-radius: 20rpx; }
+.desc-actions { display: flex; gap: 16rpx; }
+.btn-sm { flex: 1; padding: 16rpx; background: #2E6BFF; color: #fff; border: none; border-radius: 10rpx; font-size: 24rpx; text-align: center; }
+.btn-sm.outline { background: #fff; color: #2E6BFF; border: 2rpx solid #2E6BFF; }
+
+/* 价格区间修复 */
+.price-card .price-range .price-conf { margin-left: 8rpx; }
+
 /* 定价建议卡片 */
 .price-card { margin-top: 20rpx; padding: 24rpx; background: linear-gradient(135deg,#FFFBEB,#FFF3E0); border-radius: 16rpx; border: 2rpx solid #FFE0A0; }
 .price-main { text-align: center; padding: 16rpx 0; }
