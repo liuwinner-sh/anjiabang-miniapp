@@ -170,6 +170,87 @@ Page({
     });
   },
 
+  // 点击照片弹操作菜单：替换/设为封面/删除
+  onPhotoTap(e) {
+    const idx = e.currentTarget.dataset.idx;
+    wx.showActionSheet({
+      itemList: ['替换照片', '设为封面', '删除'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.replacePhoto(e);
+        } else if (res.tapIndex === 1) {
+          this.setCover(idx);
+        } else if (res.tapIndex === 2) {
+          this.delPhoto(e);
+        }
+      }
+    });
+  },
+
+  // 替换照片
+  async replacePhoto(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const photo = this.data.photos[idx];
+    const propId = this.data.p.id;
+    if (!propId) return;
+    const apiBase = app.globalData.apiBase.replace('/api/fang', '');
+    
+    // 先删除旧照片
+    if (photo && photo.id) {
+      await api.del('/upload/photos/' + photo.id);
+    }
+    
+    // 选择新照片上传
+    wx.chooseMedia({
+      count: 1, mediaType: ['image'],
+      success: (res) => {
+        wx.showLoading({ title: '替换中...' });
+        wx.uploadFile({
+          url: apiBase + '/api/fang/upload/properties/' + propId,
+          filePath: res.tempFiles[0].tempFilePath,
+          name: 'photos',
+          header: { 'Authorization': 'Bearer ' + app.globalData.token },
+          success: (r) => {
+            wx.hideLoading();
+            try {
+              const result = JSON.parse(r.data);
+              if (result.code === 0 || result.success) {
+                wx.showToast({ title: '替换成功', icon: 'success' });
+                this.loadProperty(propId);
+              } else {
+                wx.showToast({ title: '替换失败', icon: 'none' });
+              }
+            } catch(e) {
+              this.loadProperty(propId);
+              wx.showToast({ title: '替换成功', icon: 'success' });
+            }
+          },
+          fail: () => { wx.hideLoading(); wx.showToast({ title: '上传失败', icon: 'none' }); }
+        });
+      }
+    });
+  },
+
+  // 设为封面
+  async setCover(idx) {
+    const photo = this.data.photos[idx];
+    if (!photo || !photo.id) {
+      wx.showToast({ title: '请先上传照片', icon: 'none' });
+      return;
+    }
+    try {
+      const r = await api.put('/upload/photos/' + photo.id, { is_primary: 1 });
+      if (r.code === 0) {
+        wx.showToast({ title: '已设为封面', icon: 'success' });
+        this.loadProperty(this.data.p.id);
+      } else {
+        wx.showToast({ title: r.msg || '设置失败', icon: 'none' });
+      }
+    } catch(e) {
+      wx.showToast({ title: '设置失败', icon: 'none' });
+    }
+  },
+
   async del() {
     wx.showModal({
       title: '确认删除',

@@ -40,9 +40,13 @@
   <view class="card" wx:if="{{p.id}}">
     <view class="section-hd"><text class="section-title">📷 房源照片</text><text class="section-more" bindtap="uploadPhoto">+ 添加</text></view>
     <scroll-view class="photo-scroll" scroll-x>
-      <view class="photo-item" wx:for="{{photos}}" wx:key="id">
+      <view class="photo-item" wx:for="{{photos}}" wx:key="id" bindtap="onPhotoTap" data-idx="{{idx}}" data-photoid="{{item.id}}" data-url="{{item.url || item}}">
         <image src="{{item.url || item}}" mode="aspectFill" class="photo-img"/>
-        <text class="photo-del" bindtap="delPhoto" data-idx="{{idx}}">×</text>
+        <view class="photo-actions">
+          <text class="photo-del" bindtap="delPhoto" data-idx="{{idx}}">×</text>
+          <text class="photo-replace" bindtap="replacePhoto" data-idx="{{idx}}" data-photoid="{{item.id}}">↻</text>
+        </view>
+        <view class="photo-order" wx:if="{{idx===0}}"><text class="cover-badge">封面</text></view>
       </view>
       <view class="photo-add" bindtap="uploadPhoto"><text>+</text></view>
     </scroll-view>
