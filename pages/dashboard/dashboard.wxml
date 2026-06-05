@@ -90,6 +90,39 @@
     </view>
   </view>
 
+  <!-- 🚀 推广中心 -->
+  <view class="section" wx:if="{{!loading}}">
+    <view class="section-hd">
+      <text class="section-title">🚀 推广中心</text>
+      <text class="section-more" bindtap="goPromote">AI智能推广 ›</text>
+    </view>
+    <view class="promo-grid">
+      <view class="promo-item promo-price" bindtap="goSmartPricing">
+        <text class="promo-icon">💰</text>
+        <text class="promo-label">AI定价</text>
+        <text class="promo-desc">同小区对比·智能建议</text>
+      </view>
+      <view class="promo-item promo-poster" bindtap="goSmartPoster">
+        <text class="promo-icon">🖼️</text>
+        <text class="promo-label">AI海报</text>
+        <text class="promo-desc">招租海报·可分享</text>
+      </view>
+      <view class="promo-item promo-dist" bindtap="goSmartDistribute">
+        <text class="promo-icon">📤</text>
+        <text class="promo-label">AI分发</text>
+        <text class="promo-desc">6渠道文案·一键复制</text>
+      </view>
+      <view class="promo-item promo-desc" bindtap="goSmartDesc">
+        <text class="promo-icon">✨</text>
+        <text class="promo-label">AI描述</text>
+        <text class="promo-desc">卖点提炼·自动生成</text>
+      </view>
+    </view>
+    <view class="promo-tip" wx:if="{{promoTip}}">
+      <text>{{promoTip}}</text>
+    </view>
+  </view>
+
   <!-- 智能配盘 -->
   <view class="section" wx:if="{{smartMatch.length>0}}">
     <view class="section-hd">

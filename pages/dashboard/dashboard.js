@@ -9,7 +9,8 @@ Page({
     stats: { propertyCount: 0, rentedCount: 0, vacantCount: 0, monthlyIncome: '0', collectionRate: 0, paidCount: 0, totalBills: 0 },
     monthlyIncome: [],
     alerts: [], recentProps: [],
-    smartMatch: [] // 智能配盘
+    smartMatch: [], // 智能配盘
+    promoTip: ''
   },
 
   onShow() {
@@ -119,11 +120,21 @@ Page({
       // 排序：最紧急的排前面（到期合同 > 将到期合同 = 租金逾期）
       alerts.sort((a, b) => a.sortKey - b.sortKey || (a.action === 'overdue' ? -1 : 1));
 
+      // AI推广提示 - 根据空置房源生成
+      let promoTip = '';
+      const vacantProps = props.filter(p => p.status === 'active' && !p.is_listed);
+      if (vacantProps.length > 0) {
+        promoTip = '你有 ' + vacantProps.length + ' 套空置房源，建议使用AI工具推广招租';
+      } else if (props.some(p => p.status === 'active')) {
+        promoTip = '已有房源在出租中，点击AI工具加速成交';
+      }
+      
       this.setData({
         stats: { propertyCount: props.length, rentedCount, vacantCount, monthlyIncome: monthlyRent.toLocaleString(), collectionRate, paidCount, totalBills },
         monthlyIncome,
         recentProps: props.slice(0, 5),
         alerts,
+        promoTip,
         loading: false
       });
     } catch(e) { console.error(e); }
@@ -159,5 +170,36 @@ Page({
   goReport() { wx.navigateTo({ url: '/pages/report/report' }); },
   goContract() { wx.navigateTo({ url: '/pages/filing/filing' }); },
   goCustomers() { wx.navigateTo({ url: '/pages/customers/customers' }); },
-  viewProperty(e) { wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + e.currentTarget.dataset.id }); }
+  viewProperty(e) { wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + e.currentTarget.dataset.id }); },
+
+  // 🚀 推广中心
+  goPromote() { wx.navigateTo({ url: '/pages/properties/properties' }); },
+  goSmartPricing() {
+    const props = this.data.recentProps;
+    if (props.length > 0) {
+      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
+      wx.showToast({ title: '进入房源详情→点AI定价', icon: 'none', duration: 2000 });
+    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
+  },
+  goSmartPoster() {
+    const props = this.data.recentProps;
+    if (props.length > 0) {
+      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
+      wx.showToast({ title: '进入房源详情→点AI海报', icon: 'none', duration: 2000 });
+    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
+  },
+  goSmartDistribute() {
+    const props = this.data.recentProps;
+    if (props.length > 0) {
+      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
+      wx.showToast({ title: '进入房源详情→点分发', icon: 'none', duration: 2000 });
+    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
+  },
+  goSmartDesc() {
+    const props = this.data.recentProps;
+    if (props.length > 0) {
+      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
+      wx.showToast({ title: '进入房源详情→点AI描述', icon: 'none', duration: 2000 });
+    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
+  }
 });
