@@ -13,6 +13,11 @@
 
     <!-- 登录 -->
     <view class="form" wx:if="{{tab==='login'}}">
+      <!-- 微信一键登录 -->
+      <button class="btn btn-wechat" bindtap="wechatLogin" wx:if="{{canWechatLogin}}">
+        <text class="wechat-icon">💬</text> 微信一键登录
+      </button>
+      <view class="divider" wx:if="{{canWechatLogin}}"><text>或使用账号登录</text></view>
       <view class="fld">
         <text class="label">手机号</text>
         <input class="inp" type="number" placeholder="请输入手机号" placeholder-class="ph" value="{{phone}}" bindinput="onPhone" maxlength="11" adjust-position="false"/>

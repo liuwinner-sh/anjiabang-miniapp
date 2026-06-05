@@ -11,7 +11,13 @@ Page({
     loading: false, regLoading: false,
     // 重置密码
     resetPhone: '', resetPwd: '', resetPwd2: '',
-    resetMsg: '', resetMsgType: '', resetLoading: false
+    resetMsg: '', resetMsgType: '', resetLoading: false,
+    canWechatLogin: false
+  },
+
+  onLoad() {
+    // 检测是否支持微信一键登录
+    wx.canIUse('button.open-type.getPhoneNumber') && this.setData({ canWechatLogin: true });
   },
 
   onShow() {
@@ -112,6 +118,39 @@ Page({
       },
       fail: () => { this.setData({ regMsg: '网络错误', regMsgType: 'err' }); },
       complete: () => { this.setData({ regLoading: false }); }
+    });
+  },
+
+  // 微信一键登录
+  wechatLogin() {
+    wx.login({
+      success: (res) => {
+        if (res.code) {
+          wx.showLoading({ title: '微信登录中...' });
+          wx.request({
+            url: app.globalData.apiBase + '/auth/wechat-login',
+            method: 'POST',
+            header: { 'content-type': 'application/json' },
+            data: JSON.stringify({ code: res.code }),
+            success: (r) => {
+              wx.hideLoading();
+              const d = r.data;
+              if (d.code === 0 && d.data && d.data.token) {
+                app.setToken(d.data.token);
+                app.globalData.userInfo = d.data.user;
+                wx.showToast({ title: '登录成功', icon: 'success' });
+                wx.redirectTo({ url: '/pages/dashboard/dashboard' });
+              } else {
+                this.setData({ msg: d.msg || '微信登录失败，请使用账号登录', msgType: 'err' });
+              }
+            },
+            fail: () => {
+              wx.hideLoading();
+              this.setData({ msg: '网络错误', msgType: 'err' });
+            }
+          });
+        }
+      }
     });
   }
 });

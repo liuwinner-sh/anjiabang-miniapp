@@ -1,7 +1,14 @@
 <scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
   
+  <!-- 骨架屏 -->
+  <view class="skeleton" wx:if="{{loading}}">
+    <view class="sk-user"><view class="sk-circle"></view><view class="sk-lines"><view class="sk-line w60"></view><view class="sk-line w40"></view></view></view>
+    <view class="sk-row"><view class="sk-box" wx:for="4"><view class="sk-bar w80"></view><view class="sk-bar w60"></view></view></view>
+    <view class="sk-chart"><view class="sk-bar w100"></view><view class="sk-bar w100"></view><view class="sk-bar w100"></view><view class="sk-bar w80"></view><view class="sk-bar w60"></view><view class="sk-bar w80"></view></view>
+  </view>
+  
   <!-- 顶部用户卡片 -->
-  <view class="user-card">
+  <view class="user-card" wx:if="{{!loading}}">
     <view class="user-avatar">{{userInitial}}</view>
     <view class="user-info">
       <text class="user-name">{{userName}}</text>

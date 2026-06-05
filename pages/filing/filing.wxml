@@ -94,12 +94,12 @@
     </view>
     <view class="modal-bd">
       <text class="form-label">选择房源</text>
-      <picker mode="selector" range="{{properties}}" range-key="name" value="{{aiPropIdx}}" bindchange="onAIProp">
-        <view class="picker-box">{{properties[aiPropIdx]?.name || '请选择'}}</view>
+      <picker mode="selector" range="{{properties}}" range-key="{{'name'}}" value="{{aiPropIdx}}" bindchange="onAIProp">
+        <view class="picker-box">{{properties[aiPropIdx] ? properties[aiPropIdx].name : '请选择'}}</view>
       </picker>
       <text class="form-label">选择租客</text>
-      <picker mode="selector" range="{{tenants}}" range-key="name" value="{{aiTenantIdx}}" bindchange="onAITenant">
-        <view class="picker-box">{{tenants[aiTenantIdx]?.name || '请选择'}}</view>
+      <picker mode="selector" range="{{tenants}}" range-key="{{'name'}}" value="{{aiTenantIdx}}" bindchange="onAITenant">
+        <view class="picker-box">{{tenants[aiTenantIdx] ? tenants[aiTenantIdx].name : '请选择'}}</view>
       </picker>
       <button class="btn-primary" bindtap="doAiGenerate" loading="{{aiLoading}}" wx:if="{{!aiResult}}">
         {{aiLoading ? 'AI生成中...' : '开始生成合同'}}

@@ -54,3 +54,11 @@ input[type="password"] { -webkit-text-security: disc; }
 .fld-actions { display: flex; justify-content: flex-end; margin-bottom: 20rpx; }
 .link { font-size: 24rpx; color: #2E6BFF; padding: 8rpx 0; display: inline-block; }
 .link:active { opacity: .7; }
+
+/* 微信登录按钮 */
+.btn-wechat { background: #07C160; margin-bottom: 20rpx; display: flex; align-items: center; justify-content: center; gap: 8rpx; }
+.btn-wechat:active { background: #06AD56; }
+.wechat-icon { font-size: 36rpx; }
+.divider { display: flex; align-items: center; gap: 20rpx; margin: 20rpx 0; color: #B0B8C5; font-size: 22rpx; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 2rpx; background: #E4E9F0; }
+.tab-note { display: block; font-size: 20rpx; color: #9CA3AF; margin-top: 16rpx; text-align: center; }

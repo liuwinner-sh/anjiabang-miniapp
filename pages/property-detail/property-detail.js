@@ -9,7 +9,12 @@ Page({
     tenant: {},
     aiLoading: false,
     distLoading: false,
-    aiResult: ''
+    priceLoading: false,
+    posterLoading: false,
+    aiResult: '',
+    aiResultTitle: '',
+    priceSuggest: null,
+    posterData: null
   },
 
   onLoad(opts) {
@@ -260,5 +265,65 @@ Page({
     const text = this.data.aiResult;
     if (!text) return;
     wx.setClipboardData({ data: text, success: () => wx.showToast({ title: '已复制', icon: 'success' }) });
+  },
+
+  // 💰 AI智能定价
+  async getPriceSuggest() {
+    const id = this.data.p.id;
+    if (!id) return;
+    this.setData({ priceLoading: true, priceSuggest: null, aiResult: '' });
+    try {
+      const r = await api.post('/properties/' + id + '/price-suggest');
+      if (r.code === 0 && r.data) {
+        this.setData({ priceSuggest: r.data.suggestion, aiResultTitle: '💡 复制定价方案' });
+        wx.showToast({ title: '定价分析完成', icon: 'success' });
+      } else {
+        wx.showToast({ title: r.msg || '定价失败', icon: 'none' });
+      }
+    } catch(e) {
+      wx.showToast({ title: '定价分析失败', icon: 'none' });
+    }
+    this.setData({ priceLoading: false });
+  },
+
+  // 📋 复制定价方案
+  copyPriceResult() {
+    const s = this.data.priceSuggest;
+    if (!s) return;
+    let text = '【AI智能定价分析】\n建议租金：¥' + s.suggested_price + '/月\n';
+    if (s.price_range) text += '建议范围：¥' + s.price_range.low + ' ~ ¥' + s.price_range.high + '\n';
+    text += '置信度：' + s.confidence + '\n\n📊 分析理由：\n';
+    if (s.reasons) s.reasons.forEach(r => text += '• ' + r + '\n');
+    if (s.tips) { text += '\n💡 提升建议：\n'; s.tips.forEach(t => text += '• ' + t + '\n'); }
+    text += '\n—— AI安家帮 智能定价';
+    wx.setClipboardData({ data: text, success: () => wx.showToast({ title: '定价方案已复制', icon: 'success' }) });
+  },
+
+  // 🖼️ 生成招租海报
+  async generatePoster() {
+    const id = this.data.p.id;
+    if (!id) return;
+    this.setData({ posterLoading: true, posterData: null, aiResult: '' });
+    try {
+      const r = await api.post('/properties/' + id + '/poster');
+      if (r.code === 0 && r.data) {
+        this.setData({ posterData: r.data.poster });
+        wx.showToast({ title: '海报已生成', icon: 'success' });
+      } else {
+        wx.showToast({ title: r.msg || '生成失败', icon: 'none' });
+      }
+    } catch(e) {
+      wx.showToast({ title: '海报生成失败', icon: 'none' });
+    }
+    this.setData({ posterLoading: false });
+  },
+
+  posterDone() { wx.showToast({ title: '可以截图保存海报分享朋友圈', icon: 'none', duration: 2500 }); },
+
+  closePoster() { this.setData({ posterData: null }); },
+
+  async regeneratePoster() {
+    this.setData({ posterData: null });
+    await this.generatePoster();
   }
 });

@@ -2,3 +2,27 @@ page, view, text, image, button, input, form, scroll-view {
   box-sizing: border-box;
 }
 .icon { width: 24px; height: 24px; }
+
+/* ========== 全局骨架屏 ========== */
+.skeleton { padding: 30rpx; }
+.sk-user { display: flex; align-items: center; gap: 20rpx; margin-bottom: 40rpx; }
+.sk-circle { width: 80rpx; height: 80rpx; border-radius: 50%; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; }
+.sk-lines { flex: 1; }
+.sk-line { height: 24rpx; border-radius: 12rpx; margin-bottom: 12rpx; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; }
+.sk-line.w60 { width: 60%; }
+.sk-line.w40 { width: 40%; }
+.sk-line.w80 { width: 80%; }
+.sk-line.w100 { width: 100%; }
+.sk-row { display: flex; gap: 16rpx; margin-bottom: 30rpx; }
+.sk-box { flex: 1; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; border-radius: 16rpx; padding: 24rpx; height: 140rpx; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12rpx; }
+.sk-bar { height: 20rpx; border-radius: 10rpx; background: rgba(255,255,255,.5); }
+.sk-bar.w80 { width: 80%; }
+.sk-bar.w60 { width: 60%; }
+.sk-bar.w100 { width: 100%; }
+.sk-chart { display: flex; gap: 16rpx; align-items: flex-end; height: 200rpx; padding: 20rpx; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; border-radius: 16rpx; }
+.sk-chart .sk-bar { flex: 1; border-radius: 6rpx 6rpx 0 0; background: rgba(200,200,210,.4); margin-bottom: 0; }
+
+@keyframes sk-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

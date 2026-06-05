@@ -3,6 +3,7 @@ const api = require('../../utils/api');
 
 Page({
   data: {
+    loading: true,
     refreshing: false,
     userName: '房东', userInitial: '房', dateStr: '',
     stats: { propertyCount: 0, rentedCount: 0, vacantCount: 0, monthlyIncome: '0', collectionRate: 0, paidCount: 0, totalBills: 0 },
@@ -29,6 +30,7 @@ Page({
 
   async loadData() {
     try {
+      this.setData({ loading: true });
       const [propsRes, tenantsRes, billsRes] = await Promise.all([
         api.get('/properties/my?page=1&pageSize=100'),
         api.get('/tenants?page=1&pageSize=100'),
@@ -121,7 +123,8 @@ Page({
         stats: { propertyCount: props.length, rentedCount, vacantCount, monthlyIncome: monthlyRent.toLocaleString(), collectionRate, paidCount, totalBills },
         monthlyIncome,
         recentProps: props.slice(0, 5),
-        alerts
+        alerts,
+        loading: false
       });
     } catch(e) { console.error(e); }
   },
