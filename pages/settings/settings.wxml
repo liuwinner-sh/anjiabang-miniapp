@@ -1,22 +1,46 @@
 <view class="page">
-  <view class="card">
-    <view class="user-info">
-      <view class="avatar">{{userInitial}}</view>
-      <view class="user-text">
-        <text class="user-name">{{userName}}</text>
-        <text class="user-phone">{{userPhone}}</text>
+  <!-- 用户信息卡 -->
+  <view class="card user-card">
+    <view class="uc-avatar-wrap" bindtap="changeAvatar">
+      <image class="uc-avatar" wx:if="{{userAvatar}}" src="{{userAvatar}}" mode="aspectFill"/>
+      <view class="uc-avatar uc-avatar-fallback" wx:else>{{userInitial}}</view>
+      <view class="uc-avatar-overlay"><text>📷</text></view>
+    </view>
+    <view class="uc-info">
+      <view class="uc-name-row" bindtap="editName">
+        <text class="uc-name">{{editNameVal || userName}}</text>
+        <text class="uc-edit-icon">✏️</text>
       </view>
+      <text class="uc-phone">{{userPhone}}</text>
+      <view class="uc-tag" wx:if="{{userRole}}">{{userRole}}</view>
     </view>
   </view>
 
+  <!-- 编辑姓名弹窗 -->
+  <view class="modal-mask" wx:if="{{showNameEditor}}" bindtap="closeNameEditor"></view>
+  <view class="modal name-modal" wx:if="{{showNameEditor}}">
+    <view class="modal-hd">
+      <text class="modal-title">修改昵称</text>
+      <text class="modal-close" bindtap="closeNameEditor">✕</text>
+    </view>
+    <view class="modal-bd">
+      <input class="form-input" placeholder="输入新昵称" value="{{editNameVal}}" bindinput="onNameInput" maxlength="20"/>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeNameEditor">取消</button>
+      <button class="btn-primary" bindtap="saveName">保存</button>
+    </view>
+  </view>
+
+  <!-- 菜单 -->
   <view class="menu">
-    <view class="menu-item" bindtap="changePwd"><text>🔑 修改密码</text><text>›</text></view>
-    <view class="menu-item" bindtap="showReport"><text>📊 收支报表</text><text>›</text></view>
-    <view class="menu-item" bindtap="goUtilities"><text>🔌 水电煤</text><text>›</text></view>
-    <view class="menu-item" bindtap="goRepairs"><text>🔧 维修报修</text><text>›</text></view>
-    <view class="menu-item" bindtap="goFiling"><text>📋 合同备案</text><text>›</text></view>
-    <view class="menu-item" bindtap="goCustomers"><text>👤 客户管理</text><text>›</text></view>
-    <view class="menu-item" bindtap="goSubscription"><text>💳 套餐订阅</text><text>›</text></view>
+    <view class="menu-item" bindtap="changePwd"><text class="mi-icon">🔑</text><text class="mi-txt">修改密码</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="showReport"><text class="mi-icon">📊</text><text class="mi-txt">收支报表</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goUtilities"><text class="mi-icon">🔌</text><text class="mi-txt">水电煤</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goRepairs"><text class="mi-icon">🔧</text><text class="mi-txt">维修报修</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goFiling"><text class="mi-icon">📋</text><text class="mi-txt">合同备案</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goCustomers"><text class="mi-icon">👤</text><text class="mi-txt">客户管理</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goSubscription"><text class="mi-icon">💳</text><text class="mi-txt">套餐订阅</text><text class="mi-arrow">›</text></view>
   </view>
 
   <button class="logout" bindtap="doLogout">退出登录</button>

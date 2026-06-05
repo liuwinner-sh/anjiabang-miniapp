@@ -4,6 +4,10 @@ const app = getApp();
 Page({
   data: {
     userName: '', userPhone: '', userInitial: '房',
+    userAvatar: '', userRole: '',
+    // 编辑昵称
+    showNameEditor: false,
+    editNameVal: '',
     // 修改密码
     showPwd: false,
     oldPwd: '', newPwd: '', confirmPwd: '',
@@ -22,13 +26,86 @@ Page({
   },
 
   onShow() {
+    this.loadUser();
+  },
+
+  loadUser() {
     const user = app.globalData.userInfo;
     if (user) {
       this.setData({
         userName: user.nickname || user.phone || '房东',
         userPhone: user.phone || '',
-        userInitial: (user.nickname || user.phone || '房').charAt(0)
+        userAvatar: user.avatar || '',
+        userRole: user.role || '',
+        userInitial: (user.nickname || user.phone || '房').charAt(0).toUpperCase()
       });
+    }
+  },
+
+  // ---- 修改头像 ----
+  changeAvatar() {
+    wx.chooseMedia({
+      count: 1, mediaType: ['image'],
+      success: (res) => {
+        const tempFile = res.tempFiles[0].tempFilePath;
+        wx.showLoading({ title: '上传中...' });
+        const uploadUrl = app.globalData.apiBase.replace('/api/fang', '') + '/api/fang/upload/avatar';
+        wx.uploadFile({
+          url: uploadUrl,
+          filePath: tempFile,
+          name: 'avatar',
+          header: { 'Authorization': 'Bearer ' + app.globalData.token },
+          success: (r) => {
+            try {
+              const d = JSON.parse(r.data);
+              if (d.code === 0 && d.data && d.data.url) {
+                const avatarUrl = d.data.url.startsWith('http') ? d.data.url : 'https://adequate-drums-wright-effective.trycloudflare.com' + d.data.url;
+                app.globalData.userInfo.avatar = avatarUrl;
+                this.setData({ userAvatar: avatarUrl });
+                wx.hideLoading();
+                wx.showToast({ title: '头像已更新', icon: 'success' });
+              } else {
+                wx.hideLoading();
+                wx.showToast({ title: '上传失败', icon: 'none' });
+              }
+            } catch(e) {
+              wx.hideLoading();
+              wx.showToast({ title: '上传失败', icon: 'none' });
+            }
+          },
+          fail: () => { wx.hideLoading(); wx.showToast({ title: '网络错误', icon: 'none' }); }
+        });
+      }
+    });
+  },
+
+  // ---- 编辑昵称 ----
+  editName() {
+    this.setData({ showNameEditor: true, editNameVal: this.data.userName });
+  },
+  closeNameEditor() { this.setData({ showNameEditor: false }); },
+  onNameInput(e) { this.setData({ editNameVal: e.detail.value }); },
+  async saveName() {
+    const name = this.data.editNameVal;
+    if (!name || !name.trim()) { wx.showToast({ title: '昵称不能为空', icon: 'none' }); return; }
+    wx.showLoading({ title: '保存中...' });
+    try {
+      const res = await api.put('/user/profile', { nickname: name.trim() });
+      wx.hideLoading();
+      if (res.code === 0) {
+        app.globalData.userInfo.nickname = name.trim();
+        this.setData({
+          userName: name.trim(),
+          userInitial: name.trim().charAt(0).toUpperCase(),
+          showNameEditor: false
+        });
+        wx.showToast({ title: '昵称已更新', icon: 'success' });
+      } else {
+        wx.showToast({ title: res.msg || '保存失败', icon: 'none' });
+      }
+    } catch(e) {
+      wx.hideLoading();
+      wx.showToast({ title: '保存失败', icon: 'none' });
     }
   },
 
