@@ -3,6 +3,7 @@ const api = require('../../utils/api');
 Page({
   data: {
     list: [],
+    filteredList: [],
     refreshing: false,
     filterStatus: 'all',
     // 新增弹窗
@@ -37,10 +38,11 @@ Page({
         c._tags = (c.ai_tags || '').split(',').filter(Boolean);
         c._budget = c.budget_min && c.budget_max ? '¥' + c.budget_min + '-' + c.budget_max : '';
         c._lastContact = c.last_contact ? (c.last_contact || '').slice(0, 10) : '未联系';
-        c._statusText = c.status === 'new' ? '新客' : c.status === 'contacted' ? '已联系' : c.status === 'interested' ? '有意向' : c.status === 'closed' ? '已成交' : c.status;
+        c._statusText = c.status === 'new' ? '新客' : c.status === 'contacted' ? '已联系' : c.status === 'interested' ? '有意向' : c.status === 'deal' ? '已成交' : c.status === 'lost' ? '已流失' : c.status;
         c._statusClass = c.status === 'new' ? 'tag-blue' : c.status === 'contacted' ? 'tag-orange' : c.status === 'interested' ? 'tag-green' : 'tag-gray';
       });
       this.setData({ list: items });
+      this.filterList();
     } catch(e) { console.error(e); }
   },
 
@@ -49,11 +51,14 @@ Page({
   // ---- 筛选 ----
   filterBy(e) {
     this.setData({ filterStatus: e.currentTarget.dataset.status || 'all' });
+    this.filterList();
   },
 
-  get filteredList() {
+  filterList() {
     const s = this.data.filterStatus;
-    return s === 'all' ? this.data.list : this.data.list.filter(c => c.status === s);
+    this.setData({
+      filteredList: s === 'all' ? this.data.list : this.data.list.filter(c => c.status === s)
+    });
   },
 
   // ---- 新增客户（AI自动打标签） ----
