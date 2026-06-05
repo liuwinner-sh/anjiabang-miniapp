@@ -9,8 +9,13 @@ Page({
     stats: { propertyCount: 0, rentedCount: 0, vacantCount: 0, monthlyIncome: '0', collectionRate: 0, paidCount: 0, totalBills: 0 },
     monthlyIncome: [],
     alerts: [], recentProps: [],
-    smartMatch: [], // 智能配盘
-    promoTip: ''
+    allProps: [],
+    promoTip: '',
+    // 房源选择弹窗
+    showPropPicker: false,
+    pickerTitle: '选择房源',
+    pickerAction: '',
+    propPickerLoading: false
   },
 
   onShow() {
@@ -137,6 +142,7 @@ Page({
         stats: { propertyCount: props.length, rentedCount, vacantCount, monthlyIncome: monthlyRent.toLocaleString(), collectionRate, paidCount, totalBills },
         monthlyIncome,
         recentProps: props.slice(0, 5),
+        allProps: props,
         alerts,
         promoTip,
         loading: false
@@ -176,34 +182,23 @@ Page({
   goCustomers() { wx.navigateTo({ url: '/pages/customers/customers' }); },
   viewProperty(e) { wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + e.currentTarget.dataset.id }); },
 
-  // 🚀 推广中心
-  goPromote() { wx.navigateTo({ url: '/pages/properties/properties' }); },
-  goSmartPricing() {
-    const props = this.data.recentProps;
-    if (props.length > 0) {
-      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
-      wx.showToast({ title: '进入房源详情→点AI定价', icon: 'none', duration: 2000 });
-    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
+  // 🚀 推广中心 - 房源选择弹窗
+  showPropPicker(e) {
+    const action = e.currentTarget.dataset.action;
+    const actions = { pricing: '💰 AI智能定价', poster: '🖼️ 生成招租海报', distribute: '📤 多平台分发', desc: '✨ AI房源描述' };
+    this.setData({
+      showPropPicker: true,
+      pickerTitle: actions[action] || '选择房源',
+      pickerAction: action
+    });
   },
-  goSmartPoster() {
-    const props = this.data.recentProps;
-    if (props.length > 0) {
-      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
-      wx.showToast({ title: '进入房源详情→点AI海报', icon: 'none', duration: 2000 });
-    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
-  },
-  goSmartDistribute() {
-    const props = this.data.recentProps;
-    if (props.length > 0) {
-      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
-      wx.showToast({ title: '进入房源详情→点分发', icon: 'none', duration: 2000 });
-    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
-  },
-  goSmartDesc() {
-    const props = this.data.recentProps;
-    if (props.length > 0) {
-      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + props[0].id });
-      wx.showToast({ title: '进入房源详情→点AI描述', icon: 'none', duration: 2000 });
-    } else { wx.navigateTo({ url: '/pages/properties/properties' }); }
+  hidePropPicker() { this.setData({ showPropPicker: false }); },
+  pickProperty(e) {
+    const id = e.currentTarget.dataset.id;
+    const action = e.currentTarget.dataset.action;
+    this.setData({ showPropPicker: false });
+    if (id) {
+      wx.navigateTo({ url: '/pages/property-detail/property-detail?id=' + id });
+    }
   }
 });

@@ -1,9 +1,71 @@
+/* ===== Design System ===== */
+page {
+  --primary: #2E6BFF;
+  --primary-light: #E8F0FF;
+  --primary-dark: #1A4FCC;
+  --success: #00C48C;
+  --success-light: #E1F5EE;
+  --warning: #FFB020;
+  --warning-light: #FFF3E0;
+  --danger: #FF6B6B;
+  --danger-light: #FCEBEB;
+  --purple: #6C5CE7;
+  --purple-light: #EDE9FE;
+  --gray-50: #F8FAFB;
+  --gray-100: #F0F2F5;
+  --gray-200: #E4E9F0;
+  --gray-300: #B0B8C5;
+  --gray-500: #6B7A8D;
+  --gray-700: #4A5568;
+  --gray-900: #1E2A3B;
+  --radius-sm: 8rpx;
+  --radius-md: 12rpx;
+  --radius-lg: 16rpx;
+  --radius-xl: 24rpx;
+  --shadow-sm: 0 2rpx 8rpx rgba(0,0,0,.04);
+  --shadow-md: 0 4rpx 16rpx rgba(0,0,0,.06);
+  --shadow-lg: 0 8rpx 32rpx rgba(0,0,0,.08);
+  --font-sm: 22rpx;
+  --font-base: 26rpx;
+  --font-md: 28rpx;
+  --font-lg: 32rpx;
+  --font-xl: 36rpx;
+  --font-2xl: 44rpx;
+}
+
 page, view, text, image, button, input, form, scroll-view {
   box-sizing: border-box;
 }
 .icon { width: 24px; height: 24px; }
 
-/* ========== 全局骨架屏 ========== */
+/* ===== 全局卡片样式 ===== */
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 28rpx 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+.card:active { box-shadow: var(--shadow-md); }
+.card-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.card-title {
+  font-size: var(--font-md);
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.card-more {
+  font-size: var(--font-sm);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* ===== 全局骨架屏 ===== */
 .skeleton { padding: 30rpx; }
 .sk-user { display: flex; align-items: center; gap: 20rpx; margin-bottom: 40rpx; }
 .sk-circle { width: 80rpx; height: 80rpx; border-radius: 50%; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; }
@@ -14,12 +76,12 @@ page, view, text, image, button, input, form, scroll-view {
 .sk-line.w80 { width: 80%; }
 .sk-line.w100 { width: 100%; }
 .sk-row { display: flex; gap: 16rpx; margin-bottom: 30rpx; }
-.sk-box { flex: 1; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; border-radius: 16rpx; padding: 24rpx; height: 140rpx; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12rpx; }
+.sk-box { flex: 1; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; border-radius: var(--radius-lg); padding: 24rpx; height: 140rpx; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12rpx; }
 .sk-bar { height: 20rpx; border-radius: 10rpx; background: rgba(255,255,255,.5); }
 .sk-bar.w80 { width: 80%; }
 .sk-bar.w60 { width: 60%; }
 .sk-bar.w100 { width: 100%; }
-.sk-chart { display: flex; gap: 16rpx; align-items: flex-end; height: 200rpx; padding: 20rpx; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; border-radius: 16rpx; }
+.sk-chart { display: flex; gap: 16rpx; align-items: flex-end; height: 200rpx; padding: 20rpx; background: linear-gradient(90deg,#E8ECF0 25%,#F0F2F5 50%,#E8ECF0 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; border-radius: var(--radius-lg); }
 .sk-chart .sk-bar { flex: 1; border-radius: 6rpx 6rpx 0 0; background: rgba(200,200,210,.4); margin-bottom: 0; }
 
 @keyframes sk-shimmer {

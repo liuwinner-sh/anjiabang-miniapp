@@ -12,44 +12,123 @@
     <view class="user-avatar">{{userInitial}}</view>
     <view class="user-info">
       <text class="user-name">{{userName}}</text>
-      <text class="user-date">{{dateStr}} 宜收租</text>
+      <text class="user-date">{{dateStr}} · {{stats.rentedCount}}/{{stats.propertyCount}}套已租</text>
     </view>
   </view>
 
   <!-- 关键指标 -->
-  <view class="kpi-row">
-    <view class="kpi blue" bindtap="goProperties">
+  <view class="kpi-grid">
+    <view class="kpi-card kpi-blue" bindtap="goProperties">
+      <view class="kpi-icon"><text>🏠</text></view>
       <text class="kpi-num">{{stats.propertyCount}}</text>
-      <text class="kpi-lbl">房源</text>
+      <text class="kpi-lbl">房源总数</text>
     </view>
-    <view class="kpi green" bindtap="goTenants">
+    <view class="kpi-card kpi-green" bindtap="goTenants">
+      <view class="kpi-icon"><text>👤</text></view>
       <text class="kpi-num">{{stats.rentedCount}}</text>
       <text class="kpi-lbl">已出租</text>
     </view>
-    <view class="kpi orange" bindtap="goProperties">
+    <view class="kpi-card kpi-orange" bindtap="goProperties">
+      <view class="kpi-icon"><text>🔑</text></view>
       <text class="kpi-num">{{stats.vacantCount}}</text>
-      <text class="kpi-lbl">空置</text>
+      <text class="kpi-lbl">空置中</text>
     </view>
-    <view class="kpi red" bindtap="goBills">
+    <view class="kpi-card kpi-red" bindtap="goBills">
+      <view class="kpi-icon"><text>💰</text></view>
       <text class="kpi-num">¥{{stats.monthlyIncome}}</text>
-      <text class="kpi-lbl">月收租</text>
+      <text class="kpi-lbl">月租金</text>
     </view>
   </view>
 
   <!-- 收款率 -->
-  <view class="section">
-    <view class="section-hd"><text class="section-title">📊 本月收款</text></view>
-    <view class="collection-rate">
+  <view class="card">
+    <view class="card-hd"><text class="card-title">📊 本月收款</text></view>
+    <view class="rate-bar-wrap">
       <view class="rate-bar">
         <view class="rate-fill" style="width:{{stats.collectionRate}}%"></view>
       </view>
-      <text class="rate-text">收款率 {{stats.collectionRate}}% ({{stats.paidCount}}/{{stats.totalBills}}笔)</text>
+      <text class="rate-num">{{stats.collectionRate}}%</text>
+    </view>
+    <text class="rate-detail">{{stats.paidCount}}/{{stats.totalBills}}笔已收</text>
+  </view>
+
+  <!-- 🚀 推广中心 -->
+  <view class="card promo-card" wx:if="{{!loading}}">
+    <view class="card-hd">
+      <text class="card-title">🚀 推广中心</text>
+      <text class="card-more">让房源更快出租 ›</text>
+    </view>
+    <view class="promo-grid">
+      <view class="promo-item" bindtap="showPropPicker" data-action="pricing">
+        <view class="promo-icon-wrap promo-icon-price"><text class="pi-emoji">💰</text></view>
+        <text class="pi-title">AI智能定价</text>
+        <text class="pi-desc">同小区比价·合理建议</text>
+      </view>
+      <view class="promo-item" bindtap="showPropPicker" data-action="poster">
+        <view class="promo-icon-wrap promo-icon-poster"><text class="pi-emoji">🖼️</text></view>
+        <text class="pi-title">招租海报</text>
+        <text class="pi-desc">一键生成·分享朋友圈</text>
+      </view>
+      <view class="promo-item" bindtap="showPropPicker" data-action="distribute">
+        <view class="promo-icon-wrap promo-icon-dist"><text class="pi-emoji">📤</text></view>
+        <text class="pi-title">多平台分发</text>
+        <text class="pi-desc">6渠道文案·一键复制</text>
+      </view>
+      <view class="promo-item" bindtap="showPropPicker" data-action="desc">
+        <view class="promo-icon-wrap promo-icon-desc"><text class="pi-emoji">✨</text></view>
+        <text class="pi-title">AI房源描述</text>
+        <text class="pi-desc">卖点提炼·自动生成</text>
+      </view>
+    </view>
+    <view class="promo-tip" wx:if="{{promoTip}}">
+      <text class="pt-icon">💡</text>
+      <text class="pt-text">{{promoTip}}</text>
     </view>
   </view>
 
-  <!-- 收入趋势（CSS柱状图） -->
-  <view class="section">
-    <view class="section-hd"><text class="section-title">📈 收入趋势</text></view>
+  <!-- 房源选择弹窗 -->
+  <view class="modal-mask" wx:if="{{showPropPicker}}" bindtap="hidePropPicker"></view>
+  <view class="modal prop-picker" wx:if="{{showPropPicker}}">
+    <view class="modal-hd">
+      <text class="modal-title">{{pickerTitle}}</text>
+      <text class="modal-close" bindtap="hidePropPicker">✕</text>
+    </view>
+    <scroll-view class="modal-list" scroll-y>
+      <view class="prop-option" wx:for="{{allProps}}" wx:key="id" bindtap="pickProperty" data-id="{{item.id}}" data-action="{{pickerAction}}">
+        <view class="po-avatar"><text>🏠</text></view>
+        <view class="po-body">
+          <text class="po-name">{{item.name || item.title}}</text>
+          <text class="po-spec">{{item.room||'?'}}室{{item.hall||'?'}}厅 · ¥{{item.price||0}}/月</text>
+        </view>
+        <text class="po-arrow">›</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 待办提醒 -->
+  <view class="card">
+    <view class="card-hd">
+      <text class="card-title">⏰ 待办提醒</text>
+      <text class="card-more" wx:if="{{alerts.length>0}}">{{alerts.length}}项</text>
+    </view>
+    <view class="alert-list">
+      <view class="alert-item" wx:for="{{alerts}}" wx:for-index="idx" wx:key="idx" bindtap="onAlert" data-idx="{{idx}}">
+        <text class="alert-icon">{{item.icon}}</text>
+        <view class="alert-body">
+          <text class="alert-text">{{item.text}}</text>
+          <text class="alert-detail" wx:if="{{item.detail}}">{{item.detail}}</text>
+        </view>
+        <button class="alert-btn" wx:if="{{item.action}}" catchtap="onAlertBtn" data-idx="{{idx}}">处理</button>
+      </view>
+    </view>
+    <view class="alert-empty" wx:if="{{alerts.length===0}}">
+      <text>✅ 一切正常，暂无待办</text>
+    </view>
+  </view>
+
+  <!-- 收入趋势 -->
+  <view class="card">
+    <view class="card-hd"><text class="card-title">📈 收入趋势</text></view>
     <view class="chart">
       <view class="chart-bar" wx:for="{{monthlyIncome}}" wx:key="idx">
         <view class="bar" style="height:{{item.pct}}%"><text class="bar-val">¥{{item.val}}</text></view>
@@ -58,76 +137,24 @@
     </view>
   </view>
 
-  <!-- 待办事 -->
-  <view class="section">
-    <view class="section-hd">
-      <text class="section-title">⏰ 待办提醒</text>
-      <text class="section-more" wx:if="{{alerts.length>0}}">{{alerts.length}}项</text>
-    </view>
-    <view class="alert-item" wx:for="{{alerts}}" wx:for-index="idx" wx:key="idx" data-idx="{{idx}}" bindtap="onAlert">
-      <text class="alert-icon">{{item.icon}}</text>
-      <view class="alert-body">
-        <text class="alert-text">{{item.text}}</text>
-        <text class="alert-detail" wx:if="{{item.detail}}">{{item.detail}}</text>
-      </view>
-      <button class="alert-btn" wx:if="{{item.action}}" catchtap="onAlertBtn" data-idx="{{idx}}">去处理</button>
-    </view>
-    <view class="alert-empty" wx:if="{{alerts.length===0}}">
-      <text>✅ 一切正常，暂无待办</text>
-    </view>
-  </view>
-
   <!-- 快捷操作 -->
-  <view class="section">
-    <view class="section-hd"><text class="section-title">⚡ 快捷操作</text></view>
+  <view class="card">
+    <view class="card-hd"><text class="card-title">⚡ 快捷操作</text></view>
     <view class="quick-grid">
-      <view class="quick-item" bindtap="goAddProp"><text class="qi-icon">🏠</text><text>添加房源</text></view>
-      <view class="quick-item" bindtap="goAddTenant"><text class="qi-icon">👤</text><text>添加租客</text></view>
-      <view class="quick-item" bindtap="goAddBill"><text class="qi-icon">💰</text><text>记一笔</text></view>
-      <view class="quick-item" bindtap="goReport"><text class="qi-icon">📊</text><text>看报表</text></view>
-      <view class="quick-item" bindtap="goContract"><text class="qi-icon">📝</text><text>合同管理</text></view>
-      <view class="quick-item" bindtap="goRepairs"><text class="qi-icon">🔧</text><text>报修</text></view>
-    </view>
-  </view>
-
-  <!-- 🚀 推广中心 -->
-  <view class="section" wx:if="{{!loading}}">
-    <view class="section-hd">
-      <text class="section-title">🚀 推广中心</text>
-      <text class="section-more" bindtap="goPromote">AI智能推广 ›</text>
-    </view>
-    <view class="promo-grid">
-      <view class="promo-item promo-price" bindtap="goSmartPricing">
-        <text class="promo-icon">💰</text>
-        <text class="promo-label">AI定价</text>
-        <text class="promo-desc">同小区对比·智能建议</text>
-      </view>
-      <view class="promo-item promo-poster" bindtap="goSmartPoster">
-        <text class="promo-icon">🖼️</text>
-        <text class="promo-label">AI海报</text>
-        <text class="promo-desc">招租海报·可分享</text>
-      </view>
-      <view class="promo-item promo-dist" bindtap="goSmartDistribute">
-        <text class="promo-icon">📤</text>
-        <text class="promo-label">AI分发</text>
-        <text class="promo-desc">6渠道文案·一键复制</text>
-      </view>
-      <view class="promo-item promo-desc" bindtap="goSmartDesc">
-        <text class="promo-icon">✨</text>
-        <text class="promo-label">AI描述</text>
-        <text class="promo-desc">卖点提炼·自动生成</text>
-      </view>
-    </view>
-    <view class="promo-tip" wx:if="{{promoTip}}">
-      <text>{{promoTip}}</text>
+      <view class="quick-item" bindtap="goAddProp"><text class="qi-icon">🏠</text><text class="qi-txt">添加房源</text></view>
+      <view class="quick-item" bindtap="goAddTenant"><text class="qi-icon">👤</text><text class="qi-txt">添加租客</text></view>
+      <view class="quick-item" bindtap="goAddBill"><text class="qi-icon">💰</text><text class="qi-txt">记一笔</text></view>
+      <view class="quick-item" bindtap="goReport"><text class="qi-icon">📊</text><text class="qi-txt">看报表</text></view>
+      <view class="quick-item" bindtap="goContract"><text class="qi-icon">📝</text><text class="qi-txt">合同管理</text></view>
+      <view class="quick-item" bindtap="goRepairs"><text class="qi-icon">🔧</text><text class="qi-txt">报修</text></view>
     </view>
   </view>
 
   <!-- 房源速览 -->
-  <view class="section">
-    <view class="section-hd">
-      <text class="section-title">🏘️ 房源速览</text>
-      <text class="section-more" bindtap="goProperties">查看全部 ›</text>
+  <view class="card">
+    <view class="card-hd">
+      <text class="card-title">🏘️ 房源速览</text>
+      <text class="card-more" bindtap="goProperties">全部 {{stats.propertyCount}}套 ›</text>
     </view>
     <view class="prop-card" wx:for="{{recentProps}}" wx:key="id" bindtap="viewProperty" data-id="{{item.id}}">
       <view class="prop-img" wx:if="{{item.photos && item.photos[0]}}">
@@ -135,11 +162,11 @@
       </view>
       <view class="prop-img placeholder" wx:else><text>🏠</text></view>
       <view class="prop-body">
-        <text class="prop-name">{{item.name}}</text>
-        <text class="prop-addr">{{item.address || '地址待补充'}}</text>
+        <text class="prop-name">{{item.name || item.title}}</text>
+        <text class="prop-addr">{{item.address || item.community || '地址待补充'}}</text>
         <view class="prop-meta">
-          <text class="prop-rent">¥{{item.rent || 0}}/月</text>
-          <text class="prop-status {{item.status}}">{{item.status==='rented'?'已出租':item.status==='active'?'空置':'其他'}}</text>
+          <text class="prop-rent">¥{{item.price || 0}}<text class="prop-unit">/月</text></text>
+          <text class="prop-badge {{item.status}}">{{item.status==='rented'?'已租':item.status==='active'?'待租':'其他'}}</text>
         </view>
       </view>
     </view>
@@ -147,10 +174,10 @@
 
   <!-- 底部导航 -->
   <view class="bottom-nav">
-    <view class="nav-item on"><text>🏠</text><text>首页</text></view>
-    <view class="nav-item" bindtap="goProperties"><text>🏘️</text><text>房源</text></view>
-    <view class="nav-item" bindtap="goBills"><text>💰</text><text>账单</text></view>
-    <view class="nav-item" bindtap="goReport"><text>📊</text><text>报表</text></view>
-    <view class="nav-item" bindtap="goSettings"><text>👤</text><text>我的</text></view>
+    <view class="nav-item on"><text class="nav-icon">🏠</text><text class="nav-txt">首页</text></view>
+    <view class="nav-item" bindtap="goProperties"><text class="nav-icon">🏘️</text><text class="nav-txt">房源</text></view>
+    <view class="nav-item" bindtap="goBills"><text class="nav-icon">💰</text><text class="nav-txt">账单</text></view>
+    <view class="nav-item" bindtap="goReport"><text class="nav-icon">📊</text><text class="nav-txt">报表</text></view>
+    <view class="nav-item" bindtap="goSettings"><text class="nav-icon">👤</text><text class="nav-txt">我的</text></view>
   </view>
 </scroll-view>
