@@ -32,18 +32,27 @@ Page({
   async loadData() {
     try {
       const res = await api.get('/customers');
-      const items = res.data || [];
+      let items = [];
+      if (Array.isArray(res)) {
+        items = res;
+      } else if (res && Array.isArray(res.data)) {
+        items = res.data;
+      } else if (res && Array.isArray(res.list)) {
+        items = res.list;
+      }
       // 解析ai_tags字符串为数组
       items.forEach(c => {
         c._tags = (c.ai_tags || '').split(',').filter(Boolean);
         c._budget = c.budget_min && c.budget_max ? '¥' + c.budget_min + '-' + c.budget_max : '';
-        c._lastContact = c.last_contact ? (c.last_contact || '').slice(0, 10) : '未联系';
-        c._statusText = c.status === 'new' ? '新客' : c.status === 'contacted' ? '已联系' : c.status === 'interested' ? '有意向' : c.status === 'deal' ? '已成交' : c.status === 'lost' ? '已流失' : c.status;
+        c._lastContact = c.last_contact ? String(c.last_contact).slice(0, 10) : '未联系';
+        c._statusText = c.status === 'new' ? '新客' : c.status === 'contacted' ? '已联系' : c.status === 'interested' ? '有意向' : c.status === 'deal' ? '已成交' : c.status === 'lost' ? '已流失' : c.status || '新客';
         c._statusClass = c.status === 'new' ? 'tag-blue' : c.status === 'contacted' ? 'tag-orange' : c.status === 'interested' ? 'tag-green' : 'tag-gray';
       });
-      this.setData({ list: items });
-      this.filterList();
-    } catch(e) { console.error(e); }
+      this.setData({ list: items, filteredList: items });
+    } catch(e) {
+      console.error(e);
+      wx.showToast({ title: '加载客户失败', icon: 'none' });
+    }
   },
 
   onRefresh() { this.setData({ refreshing: true }); this.loadData().then(() => this.setData({ refreshing: false })); },
