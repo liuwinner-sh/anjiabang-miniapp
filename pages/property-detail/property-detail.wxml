@@ -71,7 +71,7 @@
     <!-- 定价建议展示 -->
     <view class="price-card" wx:if="{{priceSuggest}}">
       <view class="price-main">
-        <text class="price-label">建议租金</text>
+        <text class="price-label">{{p.property_type==='sell' ? '建议售价' : '建议租金'}}</text>
         <text class="price-num">¥{{priceSuggest.suggested_price}}</text>
         <text class="price-range">范围：¥{{priceRangeLow}} ~ ¥{{priceRangeHigh}}<text class="price-conf">（{{priceSuggest.confidence}}置信度）</text></text>
       </view>
@@ -110,11 +110,18 @@
   </view>
 
   <view class="card">
-    <view class="fld"><text class="lbl">房源名称</text><input class="inp" value="{{p.name}}" bindinput="onField" data-f="name" placeholder="如：徐汇区XX小区A栋"/></view>
+    <!-- 出租/出售切换 -->
+    <view class="type-toggle">
+      <text class="type-opt {{p.property_type!=='sell'?'active':''}}" bindtap="setType" data-type="rent">🏠 出租</text>
+      <text class="type-opt {{p.property_type==='sell'?'active':''}}" bindtap="setType" data-type="sell">💰 出售</text>
+    </view>
+
+    <view class="fld"><text class="lbl">房源名称</text><input class="inp" value="{{p.title}}" bindinput="onField" data-f="title" placeholder="如：国浩18T 3室2厅"/></view>
     <view class="fld"><text class="lbl">地址</text><input class="inp" value="{{p.address}}" bindinput="onField" data-f="address" placeholder="详细地址"/></view>
     <view class="fld-row">
       <view class="fld"><text class="lbl">城市</text><input class="inp" value="{{p.city}}" bindinput="onField" data-f="city" placeholder="城市"/></view>
-      <view class="fld"><text class="lbl">租金(元/月)</text><input class="inp" value="{{p.rent}}" bindinput="onField" data-f="rent" type="number" placeholder="月租金"/></view>
+      <view class="fld" wx:if="{{p.property_type!=='sell'}}"><text class="lbl">租金(元/月)</text><input class="inp" value="{{p.rent}}" bindinput="onField" data-f="rent" type="number" placeholder="月租金"/></view>
+      <view class="fld" wx:if="{{p.property_type==='sell'}}"><text class="lbl">售价(万元)</text><input class="inp" value="{{p.price}}" bindinput="onField" data-f="price" type="number" placeholder="总售价"/></view>
     </view>
     <view class="fld-row">
       <view class="fld"><text class="lbl">面积(㎡)</text><input class="inp" value="{{p.area}}" bindinput="onField" data-f="area" type="digit" placeholder="面积"/></view>
@@ -124,6 +131,29 @@
         </picker>
       </view>
     </view>
+
+    <!-- 卖房专用字段 -->
+    <view class="fld-row" wx:if="{{p.property_type==='sell'}}">
+      <view class="fld"><text class="lbl">楼层</text>
+        <picker class="inp" mode="selector" range="{{floorOptions}}" bindchange="onFloorChange">
+          <text>{{p.floorDisplay || '请选择楼层'}}</text>
+        </picker>
+      </view>
+      <view class="fld"><text class="lbl">朝向</text>
+        <picker class="inp" mode="selector" range="{{orientOptions}}" bindchange="onOrientChange">
+          <text>{{p.orientDisplay || '请选择朝向'}}</text>
+        </picker>
+      </view>
+    </view>
+    <view class="fld-row" wx:if="{{p.property_type==='sell'}}">
+      <view class="fld"><text class="lbl">装修</text>
+        <picker class="inp" mode="selector" range="{{decoOptions}}" bindchange="onDecoChange">
+          <text>{{p.decoDisplay || '请选择装修'}}</text>
+        </picker>
+      </view>
+      <view class="fld"><text class="lbl">建成年份</text><input class="inp" value="{{p.building_year}}" bindinput="onField" data-f="building_year" type="number" placeholder="如2020"/></view>
+    </view>
+
     <view class="fld"><text class="lbl">备注</text><input class="inp" value="{{p.remark}}" bindinput="onField" data-f="remark" placeholder="备注信息"/></view>
     <button class="btn-save" bindtap="save">保存</button>
     <button class="btn-del" wx:if="{{p.id}}" bindtap="del">删除此房源</button>

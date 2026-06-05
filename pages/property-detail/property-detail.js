@@ -3,9 +3,12 @@ const app = getApp();
 
 Page({
   data: {
-    p: { name: '', address: '', city: '', rent: '', area: '', room: 1, hall: 1, roomDisplay: '1室1厅', remark: '', id: 0 },
+    p: { title: '', name: '', address: '', city: '', rent: '', price: '', area: '', room: 1, hall: 1, roomDisplay: '1室1厅', remark: '', id: 0, property_type: 'rent', floor: '', total_floors: '', orientation: '', decoration: '', building_year: '', floorDisplay: '请选择', orientDisplay: '请选择', decoDisplay: '请选择' },
     photos: [],
     roomTypes: ['1室0厅','1室1厅','2室1厅','2室2厅','3室1厅','3室2厅','4室2厅','5室3厅'],
+    floorOptions: ['低层(1-6层)','中层(7-12层)','高层(13-18层)','超高层(19层+)'],
+    orientOptions: ['东','南','西','北','东南','西南','东北','西北','南北通透'],
+    decoOptions: ['毛坯','简装','精装','豪装'],
     tenant: {},
     aiLoading: false,
     distLoading: false,
@@ -80,12 +83,44 @@ Page({
     }
   },
 
+  // 出租/出售切换
+  setType(e) {
+    const t = e.currentTarget.dataset.type;
+    this.setData({ 'p.property_type': t });
+  },
+
+  // 卖房字段选择器
+  onFloorChange(e) {
+    const val = this.data.floorOptions[e.detail.value];
+    this.setData({ 'p.floorDisplay': val, 'p.floor': val });
+  },
+  onOrientChange(e) {
+    const val = this.data.orientOptions[e.detail.value];
+    this.setData({ 'p.orientDisplay': val, 'p.orientation': val });
+  },
+  onDecoChange(e) {
+    const val = this.data.decoOptions[e.detail.value];
+    this.setData({ 'p.decoDisplay': val, 'p.decoration': val });
+  },
+
   async save() {
     const p = this.data.p;
-    if (!p.name) { wx.showToast({ title: '请输入房源名称', icon: 'none' }); return; }
+    if (!p.title && !p.name) { wx.showToast({ title: '请输入房源名称', icon: 'none' }); return; }
     wx.showLoading({ title: '保存中...' });
     try {
-      const data = { name: p.name, address: p.address, city: p.city, rent: parseFloat(p.rent) || 0, area: parseFloat(p.area) || 0, room: p.room || 1, hall: p.hall || 1, remark: p.remark || '' };
+      const isSell = p.property_type === 'sell';
+      const data = {
+        property_type: p.property_type,
+        name: p.title || p.name, title: p.title || p.name,
+        address: p.address, city: p.city,
+        price: isSell ? parseFloat(p.price) || 0 : parseFloat(p.rent) || 0,
+        price_unit: isSell ? '万元' : '元/月',
+        area: parseFloat(p.area) || 0, room: p.room || 1, hall: p.hall || 1,
+        remark: p.remark || '',
+        floor: p.floor, total_floors: p.total_floors,
+        orientation: p.orientation, decoration: p.decoration,
+        building_year: parseInt(p.building_year) || null
+      };
       let res;
       if (p.id) res = await api.put('/properties/' + p.id, data);
       else res = await api.post('/properties', data);
