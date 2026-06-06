@@ -61,11 +61,11 @@
       <text class="modal-close" bindtap="closeConfirm">✕</text>
     </view>
     <view class="modal-bd">
-      <text class="confirm-plan">{{selectedPlan?.name}}</text>
-      <text class="confirm-price" wx:if="{{selectedPlan?.price>0}}">¥{{selectedPlan?.price}}<text class="confirm-unit">/月</text></text>
-      <text class="confirm-price free" wx:if="{{selectedPlan?.price===0}}">免费</text>
-      <text class="confirm-desc">升级后立即生效，每月{{selectedPlan?.monthly_limit}}次AI调用</text>
-      <text class="confirm-note" wx:if="{{selectedPlan?.price>0}}">注：当前为模拟支付，不会实际扣费</text>
+      <text class="confirm-plan">{{selectedPlan && selectedPlan.name}}</text>
+      <text class="confirm-price" wx:if="{{selectedPlan && selectedPlan.price>0}}">¥{{selectedPlan.price}}<text class="confirm-unit">/月</text></text>
+      <text class="confirm-price free" wx:if="{{selectedPlan && selectedPlan.price===0}}">免费</text>
+      <text class="confirm-desc">升级后立即生效，每月{{selectedPlan ? selectedPlan.monthly_limit : '...'}}次AI调用</text>
+      <text class="confirm-note" wx:if="{{selectedPlan && selectedPlan.price>0}}">注：当前为模拟支付，不会实际扣费</text>
     </view>
     <view class="modal-ft">
       <button class="btn-cancel" bindtap="closeConfirm">取消</button>
