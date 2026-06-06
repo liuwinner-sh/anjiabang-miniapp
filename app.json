@@ -11,7 +11,8 @@
     "pages/customers/customers",
     "pages/utilities/utilities",
     "pages/settings/settings",
-    "pages/report/report"
+    "pages/report/report",
+    "pages/subscription/subscription"
   ],
   "window": {
     "navigationBarBackgroundColor": "#2E6BFF",

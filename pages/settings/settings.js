@@ -11,18 +11,6 @@ Page({
     // 修改密码
     showPwd: false,
     oldPwd: '', newPwd: '', confirmPwd: '',
-    // 套餐订阅
-    showSub: false,
-    plans: [],
-    currentPlan: null,
-    planDesc: {
-      free: '免费版 · 每月3次AI调用',
-      basic: '基础版 · ¥29/月 · 999次AI',
-      pro: '专业版 · ¥129/月 · 9999次AI',
-      enterprise: '企业版 · ¥199/月 · 不限次',
-      landlord_basic: '房东基础版 · ¥19/月 · 999次',
-      landlord_pro: '房东管家版 · ¥49/月 · 9999次'
-    }
   },
 
   onShow() {
@@ -141,51 +129,7 @@ Page({
   },
 
   // ---- 套餐订阅 ----
-  async goSubscription() {
-    wx.showLoading({ title: '加载中...' });
-    try {
-      const [planRes, statusRes] = await Promise.all([
-        api.get('/subscription/plans'),
-        api.get('/subscription/status')
-      ]);
-      this.setData({
-        showSub: true,
-        plans: planRes.data || [],
-        currentPlan: statusRes.data || { plan: 'free' }
-      });
-      wx.hideLoading();
-    } catch(e) {
-      wx.hideLoading();
-      wx.showToast({ title: '加载失败', icon: 'none' });
-    }
-  },
-  closeSub() { this.setData({ showSub: false }); },
-
-  async doUpgrade(e) {
-    const plan = e.currentTarget.dataset.plan;
-    wx.showModal({
-      title: '确认升级',
-      content: `升级到${this.data.planDesc[plan] || plan}？`,
-      success: async (res) => {
-        if (!res.confirm) return;
-        wx.showLoading({ title: '升级中...' });
-        try {
-          const r = await api.post('/subscription/upgrade', { plan });
-          if (r.success) {
-            wx.hideLoading();
-            wx.showToast({ title: r.message || '升级成功', icon: 'success' });
-            this.setData({ showSub: false });
-          } else {
-            wx.hideLoading();
-            wx.showToast({ title: r.error || '升级失败', icon: 'none' });
-          }
-        } catch(e) {
-          wx.hideLoading();
-          wx.showToast({ title: '升级失败', icon: 'none' });
-        }
-      }
-    });
-  },
+  goSubscription() { wx.navigateTo({ url: '/pages/subscription/subscription' }); },
 
   showReport() { wx.navigateTo({ url: '/pages/report/report' }); },
   goTenants() { wx.navigateTo({ url: '/pages/tenants/tenants' }); },

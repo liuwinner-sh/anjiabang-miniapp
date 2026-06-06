@@ -1,0 +1,75 @@
+<scroll-view class="page" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="loadData">
+  <view class="hd">
+    <text class="hd-title">💳 套餐订阅</text>
+    <text class="hd-desc">{{usageDesc}}</text>
+  </view>
+
+  <!-- 当前套餐 -->
+  <view class="current-card">
+    <view class="cc-top">
+      <text class="cc-plan">{{currentPlanName}}</text>
+      <text class="cc-badge" wx:if="{{currentPlan.plan==='free'}}">免费</text>
+      <text class="cc-badge active" wx:if="{{currentPlan.plan!=='free'}}">已订阅</text>
+    </view>
+    <view class="cc-usage">
+      <view class="cc-bar-wrap">
+        <view class="cc-bar" style="width:{{usagePct}}%"></view>
+      </view>
+      <text class="cc-text">本月已用 {{currentPlan.used_this_month||0}} / {{currentPlan.monthly_limit||3}} 次</text>
+    </view>
+    <text class="cc-expire" wx:if="{{currentPlan.subscription_expires}}">有效期至：{{currentPlan.subscription_expires.slice(0,10)}}</text>
+  </view>
+
+  <!-- 套餐列表 -->
+  <view class="plan-grid">
+    <view class="plan-card {{item.id===currentPlan.plan?'current':''}}" wx:for="{{plans}}" wx:key="id" wx:for-item="pl" catchtap="selectPlan" data-plan="{{pl.id}}">
+      <view class="pc-hd">
+        <text class="pc-name">{{pl.name}}</text>
+        <text class="pc-price" wx:if="{{pl.price>0}}">¥{{pl.price}}<text class="pc-unit">/月</text></text>
+        <text class="pc-price free" wx:if="{{pl.price===0}}">免费</text>
+      </view>
+      <view class="pc-features">
+        <text class="pc-feat">✓ AI调用 {{pl.monthly_limit}}次/月</text>
+        <text class="pc-feat">✓ 房源管理不限量</text>
+        <text class="pc-feat">✓ AI定价+海报+分发</text>
+        <text class="pc-feat" wx:if="{{pl.price>0}}">✓ 优先AI响应</text>
+      </view>
+      <text class="pc-badge" wx:if="{{pl.id===currentPlan.plan}}">当前套餐</text>
+      <button class="pc-btn {{pl.price===0?'free-btn':pl.id===currentPlan.plan?'current-btn':''}}" disabled="{{pl.id===currentPlan.plan}}" catchtap="selectPlan" data-plan="{{pl.id}}">
+        {{pl.id===currentPlan.plan?'当前套餐':pl.price===0?'免费使用':'升级至¥'+pl.price+'/月'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 使用统计 -->
+  <view class="section">
+    <text class="section-title">📊 AI功能使用统计</text>
+    <view class="usage-list">
+      <view class="usage-item" wx:for="{{usageStats}}" wx:key="feature">
+        <text class="us-name">{{featureNames[item.feature] || item.feature}}</text>
+        <text class="us-count">{{item.count}}次 · {{item.total_tokens||0}} tokens</text>
+      </view>
+    </view>
+    <view class="usage-empty" wx:if="{{usageStats.length===0}}"><text>暂无使用记录</text></view>
+  </view>
+
+  <!-- 升级确认弹窗 -->
+  <view class="modal-mask" wx:if="{{showConfirm}}" bindtap="closeConfirm"></view>
+  <view class="modal" wx:if="{{showConfirm}}">
+    <view class="modal-hd">
+      <text class="modal-title">确认升级</text>
+      <text class="modal-close" bindtap="closeConfirm">✕</text>
+    </view>
+    <view class="modal-bd">
+      <text class="confirm-plan">{{selectedPlan?.name}}</text>
+      <text class="confirm-price" wx:if="{{selectedPlan?.price>0}}">¥{{selectedPlan?.price}}<text class="confirm-unit">/月</text></text>
+      <text class="confirm-price free" wx:if="{{selectedPlan?.price===0}}">免费</text>
+      <text class="confirm-desc">升级后立即生效，每月{{selectedPlan?.monthly_limit}}次AI调用</text>
+      <text class="confirm-note" wx:if="{{selectedPlan?.price>0}}">注：当前为模拟支付，不会实际扣费</text>
+    </view>
+    <view class="modal-ft">
+      <button class="btn-cancel" bindtap="closeConfirm">取消</button>
+      <button class="btn-primary" bindtap="doUpgrade" loading="{{upgrading}}">{{upgrading?'升级中...':'确认升级'}}</button>
+    </view>
+  </view>
+</scroll-view>
