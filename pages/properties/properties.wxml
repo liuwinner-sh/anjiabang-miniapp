@@ -8,12 +8,15 @@
     <view class="item" wx:for="{{list}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
       <view class="item-top">
         <text class="item-name">{{item.name}}</text>
-        <text class="item-status {{item.status}}">{{item.status==='rented'?'已出租':item.status==='active'?'空置':item.status}}</text>
+        <view class="item-tags">
+          <text class="item-type {{item.property_type}}">{{item.property_type==='sell'?'出售':'出租'}}</text>
+          <text class="item-status {{item.status}}">{{item.status==='rented'?'已租':item.status==='active'?'待租':item.status==='sold'?'已售':item.status}}</text>
+        </view>
       </view>
       <text class="item-addr">{{item.address || '地址未填'}}</text>
       <view class="item-bottom">
-        <text class="item-rent">¥{{item.rent||0}}/月</text>
-        <text class="item-tenant" wx:if="{{item.tenant_name}}">租客：{{item.tenant_name}}</text>
+        <text class="item-price">{{item.property_type==='sell'?'¥'+item.price+'万':'¥'+item.price+'/月'}}</text>
+        <text class="item-spec">{{item.room||'?'}}室{{item.hall||'?'}}厅 · {{item.area||'?'}}㎡</text>
       </view>
     </view>
   </view>
