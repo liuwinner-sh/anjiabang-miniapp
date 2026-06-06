@@ -11,6 +11,11 @@ Page({
     // 修改密码
     showPwd: false,
     oldPwd: '', newPwd: '', confirmPwd: '',
+    // 邀请协作
+    showInvite: false,
+    inviteCode: '',
+    inviteLoading: false,
+    qrData: '',
   },
 
   onShow() {
@@ -130,6 +135,35 @@ Page({
 
   // ---- 套餐订阅 ----
   goSubscription() { wx.navigateTo({ url: '/pages/subscription/subscription' }); },
+
+  // ---- 邀请协作 ----
+  async goInvite() {
+    this.setData({ showInvite: true, inviteCode: '' });
+    wx.showLoading({ title: '加载中...' });
+    try {
+      const res = await api.get('/invite/my');
+      wx.hideLoading();
+      if (res.code === 0 && res.data && res.data.invite_code) {
+        const code = res.data.invite_code;
+        this.setData({ inviteCode: code, qrData: encodeURIComponent('https://defeat-well-dedicated-scientists.trycloudflare.com/invite/' + code) });
+      }
+    } catch(e) { wx.hideLoading(); }
+  },
+  closeInvite() { this.setData({ showInvite: false }); },
+  async genInvite() {
+    this.setData({ inviteLoading: true });
+    try {
+      const res = await api.post('/invite/generate');
+      if (res.code === 0 && res.data && res.data.invite_code) {
+        const code = res.data.invite_code;
+        this.setData({ inviteCode: code, qrData: encodeURIComponent('https://defeat-well-dedicated-scientists.trycloudflare.com/invite/' + code) });
+      } else { wx.showToast({ title: res.msg || '生成失败', icon: 'none' }); }
+    } catch(e) { wx.showToast({ title: '生成失败', icon: 'none' }); }
+    this.setData({ inviteLoading: false });
+  },
+  copyInviteCode() {
+    wx.setClipboardData({ data: this.data.inviteCode, success: () => wx.showToast({ title: '邀请码已复制', icon: 'success' }) });
+  },
 
   showReport() { wx.navigateTo({ url: '/pages/report/report' }); },
   goTenants() { wx.navigateTo({ url: '/pages/tenants/tenants' }); },

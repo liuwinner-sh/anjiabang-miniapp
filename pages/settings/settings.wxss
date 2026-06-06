@@ -42,3 +42,14 @@
 .btn-cancel { flex: 1; padding: 22rpx; background: #F5F7FA; color: #6B7A8D; border: none; border-radius: 12rpx; font-size: 28rpx; }
 
 .name-modal { max-height: 300rpx; }
+
+/* 邀请协作 */
+.invite-bd { text-align: center; }
+.invite-desc { font-size: 24rpx; color: #6B7A8D; display: block; margin-bottom: 24rpx; }
+.invite-code-box { display: flex; align-items: center; justify-content: center; gap: 16rpx; margin-bottom: 24rpx; }
+.invite-code { font-size: 56rpx; font-weight: 800; letter-spacing: 8rpx; color: #2E6BFF; background: #E8F0FF; padding: 16rpx 32rpx; border-radius: 16rpx; }
+.btn-copy-sm { font-size: 22rpx; padding: 10rpx 18rpx; background: #2E6BFF; color: #fff; border: none; border-radius: 8rpx; }
+.invite-qr { margin-bottom: 24rpx; }
+.qr-img { width: 240rpx; height: 240rpx; display: block; margin: 0 auto; }
+.qr-hint { display: block; font-size: 22rpx; color: #6B7A8D; margin-top: 8rpx; }
+.btn-gen { width: 100%; padding: 20rpx; background: #E8F0FF; color: #2E6BFF; border: 2rpx solid #2E6BFF; border-radius: 12rpx; font-size: 26rpx; font-weight: 600; }

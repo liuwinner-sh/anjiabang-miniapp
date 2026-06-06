@@ -42,6 +42,29 @@
     <view class="menu-item" bindtap="goFiling"><text class="mi-icon">📋</text><text class="mi-txt">合同备案</text><text class="mi-arrow">›</text></view>
     <view class="menu-item" bindtap="goCustomers"><text class="mi-icon">👤</text><text class="mi-txt">意向客户</text><text class="mi-arrow">›</text></view>
     <view class="menu-item" bindtap="goSubscription"><text class="mi-icon">💳</text><text class="mi-txt">套餐订阅</text><text class="mi-arrow">›</text></view>
+    <view class="menu-item" bindtap="goInvite"><text class="mi-icon">📨</text><text class="mi-txt">邀请协作</text><text class="mi-arrow">›</text></view>
+  </view>
+
+  <!-- ===== 邀请协作弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showInvite}}" bindtap="closeInvite"></view>
+  <view class="modal" wx:if="{{showInvite}}">
+    <view class="modal-hd">
+      <text class="modal-title">📨 邀请协作</text>
+      <text class="modal-close" bindtap="closeInvite">✕</text>
+    </view>
+    <view class="modal-bd invite-bd">
+      <text class="invite-desc">分享此邀请码给合伙人，对方注册后自动关联</text>
+      <view class="invite-code-box" wx:if="{{inviteCode}}">
+        <text class="invite-code">{{inviteCode}}</text>
+        <button class="btn-copy-sm" bindtap="copyInviteCode">📋 复制</button>
+      </view>
+      <view class="invite-qr" wx:if="{{inviteCode}}">
+        <image src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{qrData}}" mode="widthFix" class="qr-img"/>
+        <text class="qr-hint">对方扫码打开小程序 → 输入此邀请码</text>
+      </view>
+      <button class="btn-gen" wx:if="{{!inviteCode}}" bindtap="genInvite" loading="{{inviteLoading}}">🔄 生成邀请码</button>
+      <button class="btn-gen" wx:if="{{inviteCode}}" bindtap="genInvite">🔄 重新生成</button>
+    </view>
   </view>
 
   <button class="logout" bindtap="doLogout">退出登录</button>
